@@ -8,7 +8,6 @@ namespace SharpieSdk.Library
 {
     public abstract class AssemblyIterator: Configurations
     {
-
         protected Disassembler disassembler = new ();
 
         protected Manager manager;

@@ -1,15 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
-        <Configurations>Debug;Release;ExportDebug</Configurations>
+        <Configurations>Debug</Configurations>
         <Platforms>AnyCPU</Platforms>
         <Version>0.1.0</Version>
         <Title>SharpieSdk.Library</Title>
         <Description>SharpieSdk.Library</Description>
+        <PackageProjectUrl>https://github.com/N0zzy/SharpieSdk.Library</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/N0zzy/SharpieSdk.Library</RepositoryUrl>
+        <RepositoryType>library</RepositoryType>
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="GodotSharp" Version="4.0.3" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="Peachpie.Library" Version="1.1.9" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 </Project>
