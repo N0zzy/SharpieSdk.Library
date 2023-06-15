@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Godot;
 using Newtonsoft.Json;
 using Pchp.Core;
 
 
-namespace PchpSdkLibrary.Service;
+namespace SharpieSdk.Library.Service;
 
 public class ExtractMembers
 {
@@ -46,29 +45,32 @@ public class ExtractMembers
     public  List<PhpMemberProperty> ExtractProperties()
     {
         List<PhpMemberProperty> properties = new List<PhpMemberProperty>();
-        
+
         foreach (var prop in Type.GetProperties(_flags))
         {
-            var accessors = prop.GetAccessors();
-            
-            string modifierBase = null;
-            string modifierStatic = null;
+            string modifierBase = String.Empty;
+            string modifierStatic = String.Empty;
             List<string> methods = new();
-            Boolean isAdd = true;
-
-            foreach (var accessor in accessors)
+            try
             {
-                if (accessor.IsPrivate)
+                var accessors = prop.GetAccessors(true);
+                foreach (MethodInfo accessor in accessors)
                 {
-                    isAdd = false; continue;
+                    if (accessor.IsPrivate && !accessor.IsFamily)
+                    {
+                        modifierBase = "private";
+                        continue;
+                    }
+                    modifierBase = accessor.IsPublic ? "public" : "protected";
+                    modifierStatic = accessor.IsStatic ? "static" : "";
+                    methods.Add("\t * @method " + accessor.Name + "()");
                 }
-                isAdd = true;
-                modifierBase = accessor.IsPublic ? "public" : "protected";
-                modifierStatic = accessor.IsStatic ? "static" : "";
-                methods.Add("\t * @method " + accessor.Name + "()");
             }
-
-            if (!isAdd) return null;
+            catch (System.NullReferenceException e){
+                Console.WriteLine(e.Message);
+            }
+            
+            if (modifierBase == "private") continue;
 
             properties.Add(new PhpMemberProperty()
             {
@@ -94,6 +96,8 @@ public class ExtractMembers
         
         foreach (var method in Type.GetMethods(_flags))
         {
+            if(method.IsPrivate) continue;
+            
             Dictionary<string, string> args = new();
             List<PhpReturnType> returnTypes = new();
             
@@ -114,8 +118,11 @@ public class ExtractMembers
             methods.Add(new PhpMemberMethod()
             {
                 Name = method.Name,
+                Modifier = method.IsPublic ? "public " : "protected ",
+                Static = method.IsStatic ? "static " : "",
                 ReturnType = returnTypes,
-                Arguments = args
+                Arguments = args,
+                IsNameError = method.Name.IndexOf('<') != -1 
             });
         }
         return methods;

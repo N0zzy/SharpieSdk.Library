@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Godot;
 
-namespace PchpSdkLibrary.Service;
+namespace SharpieSdk.Library.Service;
 
 public class Disassembler: Components
 {
@@ -46,17 +46,10 @@ public class Disassembler: Components
         Dirs = ToRewriteDirs();
         Abstract = ToExtractAbstractElement();
         
-        try
-        {
-            AddCsFields();
-            AddCsProps();
-            AddCsMethods();
-        }
-        catch (Exception e)
-        {
-            GD.Print(e.Message);
-            GD.Print(e.StackTrace);
-        }
+
+        AddCsFields();
+        AddCsProps();
+        AddCsMethods();
     }
 
     private void AddCsFields()
@@ -64,11 +57,13 @@ public class Disassembler: Components
         var k = 0;
         foreach (PhpMemberProperty property in _members.ExtractFields())
         {
+            //Console.WriteLine(property.Name);
             if (!_props.ContainsKey(property.Name))
             {
                 _props[property.Name] = new Dictionary<int, PhpMemberProperty>();
             }
             _props[property.Name][k] = property;
+            k++;
         }
     }
     
@@ -82,6 +77,7 @@ public class Disassembler: Components
                 _props[property.Name] = new Dictionary<int, PhpMemberProperty>();
             }
             _props[property.Name][k] = property;
+            k++;
         }
     }
 
@@ -95,6 +91,7 @@ public class Disassembler: Components
                 _methods[method.Name] = new Dictionary<int, PhpMemberMethod>();
             }
             _methods[method.Name][k] = method;
+            k++;
         }
     }
     
@@ -121,8 +118,11 @@ public class Disassembler: Components
         try
         {
             using StreamWriter php = new StreamWriter(Dirs + $"/{name}.php");
+            AddUseOverrideMethods();
+            
             php.WriteLine(string.Join("\n", scriptBase));
             php.WriteLine(string.Join("\n", scriptUses.Distinct()));
+            php.WriteLine(string.Join("\n", scriptOverrideMethods));
             php.WriteLine(string.Join("\n", scriptComments.Distinct()));
             php.WriteLine(string.Join("\n", scriptElement));
             php.WriteLine(string.Join("\n", scriptMembers));
@@ -133,6 +133,14 @@ public class Disassembler: Components
         {
             using StreamWriter writer = new StreamWriter(Dirs + "/__sdk_error_log__.txt", true);
             writer.WriteLine(name);
+        }
+    }
+
+    private void AddUseOverrideMethods()
+    {
+        if (scriptOverrideMethods.Count > 0)
+        {
+            scriptElement.Add("\tuse OverrideMethods;");
         }
     }
 }

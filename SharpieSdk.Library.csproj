@@ -3,12 +3,13 @@
         <TargetFramework>net7.0</TargetFramework>
         <Configurations>Debug;Release;ExportDebug</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <Version>0.1.0</Version>
+        <Title>SharpieSdk.Library</Title>
+        <Description>SharpieSdk.Library</Description>
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="GodotSharp" Version="4.0.3" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="Peachpie.Runtime" Version="1.1.9" />
-      <PackageReference Include="Peachpie.App" Version="1.1.9" />
       <PackageReference Include="Peachpie.Library" Version="1.1.9" />
     </ItemGroup>
 </Project>

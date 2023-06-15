@@ -1,4 +1,4 @@
-﻿namespace PchpSdkLibrary.Service;
+﻿namespace SharpieSdk.Library.Service;
 
 public class PhpReturnType
 {

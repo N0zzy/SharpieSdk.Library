@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Pchp.Core;
 
-namespace PchpSdkLibrary.Service
+namespace SharpieSdk.Library.Service
 {
     public static class SharpieExtension
     {

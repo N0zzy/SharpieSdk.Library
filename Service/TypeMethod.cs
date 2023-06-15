@@ -1,4 +1,4 @@
-﻿namespace PchpSdkLibrary.Service;
+﻿namespace SharpieSdk.Library.Service;
 
 /// <summary>
 /// TypeArgument is a class to convert to json.

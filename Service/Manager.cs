@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 
-namespace PchpSdkLibrary.Service
+namespace SharpieSdk.Library.Service
 {
      public class Manager
      {
@@ -25,7 +25,7 @@ namespace PchpSdkLibrary.Service
                JObject obj = ParseJson(GetJson());
                string keyPath = GetRestorePath(obj);
 
-               var lObj = obj["projects"]?.First().ToList();
+               var lObj = obj["projects"]?.Last().ToList();
 
                NugetPackagesPath = GetNugetPackagesPath(lObj);
                OriginalTargetFrameworks = GetOriginalTargetFrameworks(lObj);

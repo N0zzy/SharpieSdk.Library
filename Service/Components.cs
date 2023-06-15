@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using Godot;
 using Newtonsoft.Json;
 
-namespace PchpSdkLibrary.Service;
+namespace SharpieSdk.Library.Service;
 
 public abstract class Components
 {
     public readonly string Descriptor = "<?php";
-    public string _pathRoot = "";
+    public string _pathRoot = String.Empty;
+    public string _pathCustom = String.Empty;
     public readonly string _pathSdk = "/.sdk";
-    
+
     public string Dirs { get; set; }
     public string Name { get; set; }
     public string Namespace { get; set; }
@@ -29,6 +29,7 @@ public abstract class Components
     public List<string> scriptComments = new();
     public List<string> scriptElement = new();
     public List<string> scriptMembers = new();
+    public List<string> scriptOverrideMethods = new();
 
     protected ExtractMembers _members = new();
     
@@ -71,8 +72,8 @@ public abstract class Components
         }
         catch (Exception e)
         {
-            GD.Print(e.Message);
-            GD.Print(e.StackTrace);
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
         }
 
     }
@@ -80,53 +81,23 @@ public abstract class Components
     {
         try
         {
+            scriptOverrideMethods.Add("\ntrait OverrideMethods {");
             foreach (var methods in _methods)
             {
                 var name = methods.Key;
-                foreach (var value in methods.Value.Values)
+                if (methods.Value.Count > 1)
                 {
-                    var args = "";
-                    var end = "";
-                    var type = "";
-                    List<string> argumentList = new();
-                    List<string> typeList = new();
-                    
-                    scriptMembers.Add("\t/**");
-                    
-                    foreach (var argument in value.Arguments)
-                    {
-                        var json = JsonConvert.DeserializeObject<TypeArgument>(argument.Value);
-                        scriptMembers.Add($"\t * @param {json.Name.ToOriginalTypeName()} ${argument.Key}");
-                        argumentList.Add("$" + argument.Key);
-                    }
-
-                    foreach (var t in value.ReturnType)
-                    {
-                        typeList.Add(t.Name);
-                        if (t.Name.Equals("Void"))
-                        {
-                            typeList.Clear();
-                            typeList.Add("Void");
-                            typeList.Add("void");
-                            break;
-                        }
-                    }
-                    
-                    type = typeList.Count < 1 ? "Void|void" : string.Join("|", typeList);
-                    
-                    args = string.Join(", ", argumentList);
-                    end = IsClass() ? "{}" : ";";
-                
-                    scriptMembers.Add("\t * @return " + type);
-                    scriptMembers.Add("\t */");
-                    scriptMembers.Add($"\tpublic function {name}({args}){end}");
+                    ToPhpOverrideMethod(name, methods);
+                    continue;
                 }
+                ToPhpOriginalMethod(name, methods);
             }
+            scriptOverrideMethods.Add("}");
         }
         catch (Exception e)
         {
-            GD.Print(e.Message);
-            GD.Print(e.StackTrace);
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
         }
 
     }
@@ -184,6 +155,102 @@ public abstract class Components
             scriptMembers.Add("\t */");
             var close = isErrorName ? "//" : "";
             scriptMembers.Add($"\t{close}{_public}{_static}${name};");
+        }
+    }
+
+    protected void ToPhpOverrideMethod(string name, KeyValuePair<string, Dictionary<int, PhpMemberMethod>> methods)
+    {
+        var k = 0;
+        var isError = false;
+        var modifier = string.Empty;
+        var @static = string.Empty;
+        var end = String.Empty;
+        scriptMembers.Add("\t/**");
+        foreach (var method in methods.Value.Values)
+        {
+            var _args = String.Empty;
+            var _type = String.Empty;
+            List<string> argumentList = new();
+            List<string> typeList = new();
+            
+            k++;
+            if (!isError)
+            {
+                isError = method.IsNameError;
+            }
+            modifier = method.Modifier;
+            
+            scriptOverrideMethods.Add("\t /**");
+            
+            foreach (var argument in method.Arguments)
+            {
+                var json = JsonConvert.DeserializeObject<TypeArgument>(argument.Value);
+                scriptOverrideMethods.Add($"\t  * @param {json.Name.ToOriginalTypeName()} ${argument.Key}");
+                argumentList.Add("$" + argument.Key);
+            }
+            foreach (var t in method.ReturnType)
+            {
+                typeList.Add(t.Name);
+                scriptUses.Add($"use {t.Namespace}.{t.Name.ToOriginalTypeName()};".ToReplaceDot("\\"));
+            }
+            _type = typeList.Count < 1 ? "Void|void" : string.Join("|", typeList);
+            _args = string.Join(", ", argumentList);
+            
+            scriptOverrideMethods.Add($"\t  * @return {_type}");
+            scriptOverrideMethods.Add("\t  */");
+            scriptOverrideMethods.Add($"\tprotected function {name}_{k}({_args})" + "{}");
+            scriptMembers.Add("\t * @uses OverrideMethods::" + $"{name}_{k} ({_args}) : {_type}");
+        }
+        
+        scriptMembers.Add("\t * @return mixed");
+        scriptMembers.Add("\t */");
+        end = IsClass() ? "{}" : ";";
+        var comment = isError ? "//" : "";
+        scriptMembers.Add($"\t{comment}#[Override] {modifier}{@static}function {name}(mixed ...$args){end}");
+    }
+
+    protected void ToPhpOriginalMethod(string name, KeyValuePair<string, Dictionary<int, PhpMemberMethod>> methods)
+    {
+        foreach (var method in methods.Value.Values)
+        {
+            var args = String.Empty;
+            var end = String.Empty;
+            var type = String.Empty;
+            List<string> argumentList = new();
+            List<string> typeList = new();
+            
+            scriptMembers.Add("\t/**");
+            //Console.WriteLine($"method: {method.Name}");
+            //Console.WriteLine(string.Join(", ", method.Arguments.Values.ToArray()));
+
+            foreach (var argument in method.Arguments)
+            {
+                var json = JsonConvert.DeserializeObject<TypeArgument>(argument.Value);
+                scriptMembers.Add($"\t * @param {json.Name.ToOriginalTypeName()} ${argument.Key}");
+                argumentList.Add("$" + argument.Key);
+            }
+
+            foreach (var t in method.ReturnType)
+            {
+                typeList.Add(t.Name);
+                if (t.Name.Equals("Void"))
+                {
+                    typeList.Clear();
+                    typeList.Add("Void");
+                    typeList.Add("void");
+                    break;
+                }
+                scriptUses.Add($"use {t.Namespace}.{t.Name.ToOriginalTypeName()};".ToReplaceDot("\\"));
+            }
+            
+            type = typeList.Count < 1 ? "Void|void" : string.Join("|", typeList);
+            
+            args = string.Join(", ", argumentList);
+            end = IsClass() ? "{}" : ";";
+            scriptMembers.Add("\t * @return " + type);
+            scriptMembers.Add("\t */");
+            var comment = method.IsNameError ? "//" : "";
+            scriptMembers.Add($"\t{comment}{method.Modifier}{method.Static}function {name}({args}){end}");
         }
     }
     protected string ToRewriteDirs(string ns)
@@ -260,6 +327,7 @@ public abstract class Components
         scriptComments.Clear();
         scriptElement.Clear();
         scriptMembers.Clear();
+        scriptOverrideMethods.Clear();
         Name = null;
         Element = null;
         Namespace = null;

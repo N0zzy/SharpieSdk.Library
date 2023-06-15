@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using PchpSdkLibrary.Service;
+using SharpieSdk.Library.Service;
 
-namespace PchpSdkLibrary
+namespace SharpieSdk.Library
 {
     public abstract class AssemblyIterator: Configurations
     {
@@ -18,6 +19,8 @@ namespace PchpSdkLibrary
     {
         protected string PathRoot { get; init; }
         protected string PathSdk { get; init; }
+        protected string PathCustom { get; init; }
+        protected List<string> PathIgnore { get; init; }
 
         protected Boolean IsAssemblyConfig()
         {
