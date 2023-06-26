@@ -3,7 +3,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <Configurations>Debug</Configurations>
         <Platforms>AnyCPU</Platforms>
-        <Version>0.1.0</Version>
+        <Version>0.1.1</Version>
         <Title>SharpieSdk.Library</Title>
         <Description>SharpieSdk.Library</Description>
         <PackageProjectUrl>https://github.com/N0zzy/SharpieSdk.Library</PackageProjectUrl>
