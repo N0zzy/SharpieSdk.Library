@@ -9,6 +9,7 @@ public class PhpMemberMethod
     public string Static { set; get; }
     public List<PhpReturnType> ReturnType { set; get; }
     public bool IsNameError { get; set; }
+    public bool IsAbstract { get; set; }
 
     public Dictionary<string, string> Arguments = new();
 }

@@ -20,9 +20,10 @@ namespace SharpieSdk.Library.Service
         
         public static string ToOriginalName(this string s)
         {
-            return Regex.Match(
-                s, "^[a-z0-9\\._]+", RegexOptions.IgnoreCase
-            ).ToString();
+            var str = Regex.Match(
+                s, "^[a-z0-9\\._\\\\]+", RegexOptions.IgnoreCase
+            );
+            return (str.Success) ? str.ToString() : s;
         }
         
         public static string ToOriginalTypeName(this string s)

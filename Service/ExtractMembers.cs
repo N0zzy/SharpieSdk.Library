@@ -11,8 +11,8 @@ public class ExtractMembers
 {
     public Type Type { get; set; }
     
-    private readonly BindingFlags _flags = BindingFlags.Instance | 
-                                           BindingFlags.Public | 
+    private readonly BindingFlags _flags = BindingFlags.Instance |
+                                           BindingFlags.Public |
                                            BindingFlags.Static |
                                            BindingFlags.NonPublic;
 
@@ -35,7 +35,7 @@ public class ExtractMembers
                 ModifierStatic = prop!.IsStatic ? "static " : "",
                 IsLiteral = prop.IsLiteral,
                 IsInitOnly = prop.IsInitOnly,
-                IsNameError = prop.Name.IndexOf('<') != -1 
+                IsNameError = prop.Name.IndexOf('<') != -1
             });
         }
 
@@ -122,7 +122,8 @@ public class ExtractMembers
                 Static = method.IsStatic ? "static " : "",
                 ReturnType = returnTypes,
                 Arguments = args,
-                IsNameError = method.Name.IndexOf('<') != -1 
+                IsNameError = method.Name.IndexOf('<') != -1,
+                IsAbstract = method.IsAbstract
             });
         }
         return methods;
@@ -132,7 +133,6 @@ public class ExtractMembers
     {
         List<PhpReturnType> RTypes = new();
         var phpValue = PhpValue.FromClr(t);
-        
         if (phpValue.IsPhpNumber())
         {
             RTypes.Add(new PhpReturnType()

@@ -45,6 +45,7 @@ public class Disassembler: Components
         Element = ToExtractElement();
         Dirs = ToRewriteDirs();
         Abstract = ToExtractAbstractElement();
+        Implements = ToExtractImplements();
         
 
         AddCsFields();
@@ -102,6 +103,7 @@ public class Disassembler: Components
             if (!Directory.Exists(Dirs))
             {
                 Directory.CreateDirectory(Dirs);
+                //Directory.CreateDirectory(Dirs + "/.traits");
             }
         }
         catch (Exception)
@@ -117,12 +119,12 @@ public class Disassembler: Components
     {
         try
         {
-            using StreamWriter php = new StreamWriter(Dirs + $"/{name}.php");
+            using StreamWriter php = new StreamWriter(Dirs + $"/{name.Replace('`','_')}.php");
             AddUseOverrideMethods();
-            
             php.WriteLine(string.Join("\n", scriptBase));
             php.WriteLine(string.Join("\n", scriptUses.Distinct()));
             php.WriteLine(string.Join("\n", scriptOverrideMethods));
+            AddTraitsMethods(php);
             php.WriteLine(string.Join("\n", scriptComments.Distinct()));
             php.WriteLine(string.Join("\n", scriptElement));
             php.WriteLine(string.Join("\n", scriptMembers));
@@ -143,5 +145,14 @@ public class Disassembler: Components
             scriptElement.Add("\tuse OverrideMethods;");
         }
     }
+    
+    private void AddTraitsMethods(StreamWriter php)
+    {
+        if (scriptDotTraits.Count > 4)
+        {
+            var name = scriptDotTraits[0];
+            scriptDotTraits.RemoveAt(0);
+            php.WriteLine(string.Join("\n", scriptDotTraits));
+        }
+    }
 }
-
