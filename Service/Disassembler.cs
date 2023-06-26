@@ -47,7 +47,7 @@ public class Disassembler: Components
         Abstract = ToExtractAbstractElement();
         Implements = ToExtractImplements();
         
-
+        
         AddCsFields();
         AddCsProps();
         AddCsMethods();
@@ -103,7 +103,6 @@ public class Disassembler: Components
             if (!Directory.Exists(Dirs))
             {
                 Directory.CreateDirectory(Dirs);
-                //Directory.CreateDirectory(Dirs + "/.traits");
             }
         }
         catch (Exception)

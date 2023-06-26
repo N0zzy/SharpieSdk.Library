@@ -32,7 +32,7 @@ namespace SharpieSdk.Library
             string[] folders = Directory.GetDirectories(directory, folderName, SearchOption.TopDirectoryOnly);
             if (folders.Length > 0)
             {
-                return folders[0]; 
+                return folders[0];
             }
             else
             {
@@ -44,7 +44,6 @@ namespace SharpieSdk.Library
                         return result;
                 }
             }
-    
             return null;
         }
     }

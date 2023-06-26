@@ -10,7 +10,7 @@ namespace SharpieSdk.Library.Service
      public class Manager
      {
           private string Filename { get; set; }
-          public List<string> NugetCollection = new List<string>(); 
+          public List<string> NugetCollection = new();
           public string NugetPackagesPath;
           public string OriginalTargetFrameworks;
           

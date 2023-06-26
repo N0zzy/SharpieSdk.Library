@@ -68,6 +68,7 @@ public abstract class Components
         }
         scriptElement.Add($"{__abstract}{Element} {__name} {__impls}" + "{");
     }    
+    
     protected void AddPhpProperties()
     {
         try
@@ -93,6 +94,7 @@ public abstract class Components
         }
 
     }
+    
     protected void AddPhpMethods()
     {
         try
@@ -102,7 +104,6 @@ public abstract class Components
                 PackPhpInterfaceMethods();
                 return;
             }
-            
             if (IsEnum())
             {
                 PackPhpInterfaceMethods();
@@ -151,7 +152,6 @@ public abstract class Components
         }
         scriptOverrideMethods.Add("}");
     }
-    
     
     protected string ToPhpNamespace()
     {
