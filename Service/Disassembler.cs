@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Godot;
 
 namespace SharpieSdk.Library.Service;
 
@@ -58,7 +57,6 @@ public class Disassembler: Components
         var k = 0;
         foreach (PhpMemberProperty property in _members.ExtractFields())
         {
-            //Console.WriteLine(property.Name);
             if (!_props.ContainsKey(property.Name))
             {
                 _props[property.Name] = new Dictionary<int, PhpMemberProperty>();
@@ -107,10 +105,10 @@ public class Disassembler: Components
         }
         catch (Exception)
         {
-            using (StreamWriter writer = new StreamWriter(Dirs + "/__sdk_error_log__.txt", true))
-            {
-                writer.WriteLine(Dirs);
-            }
+            // using (StreamWriter writer = new StreamWriter(Dirs + "/__sdk_error_log__.txt", true))
+            // {
+            //     writer.WriteLine(Dirs);
+            // }
         }
 
     }
@@ -118,7 +116,8 @@ public class Disassembler: Components
     {
         try
         {
-            using StreamWriter php = new StreamWriter(Dirs + $"/{name.Replace('`','_')}.php");
+            string filename = Dirs + $"/{name.Replace('`', '_')}.php";
+            using StreamWriter php = new StreamWriter(filename);
             AddUseOverrideMethods();
             php.WriteLine(string.Join("\n", scriptBase));
             php.WriteLine(string.Join("\n", scriptUses.Distinct()));
@@ -132,8 +131,8 @@ public class Disassembler: Components
         }
         catch (Exception)
         {
-            using StreamWriter writer = new StreamWriter(Dirs + "/__sdk_error_log__.txt", true);
-            writer.WriteLine(name);
+            // using StreamWriter writer = new StreamWriter(Dirs + "/__sdk_error_log__.txt", true);
+            // writer.WriteLine(name);
         }
     }
 

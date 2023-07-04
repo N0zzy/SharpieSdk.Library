@@ -11,7 +11,12 @@ namespace SharpieSdk.Library
         protected Disassembler disassembler = new ();
 
         protected Manager manager;
-        protected Assembly[] GetAssemblies() { return AppDomain.CurrentDomain.GetAssemblies(); }
+
+        protected Assembly[] GetAssemblies()
+        {
+
+            return AppDomain.CurrentDomain.GetAssemblies();
+        }
     }
 
     public abstract class Configurations

@@ -103,7 +103,7 @@ public class ExtractMembers
             
             foreach (var parameter in method.GetParameters())
             {
-                if (parameter.Name == null) continue;
+                if (parameter.Name == null || args.ContainsKey(parameter.Name)) continue;
                 args.Add(
                     parameter.Name,
                     JsonConvert.SerializeObject(new TypeArgument()

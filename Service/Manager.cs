@@ -24,9 +24,19 @@ namespace SharpieSdk.Library.Service
           {
                JObject obj = ParseJson(GetJson());
                string keyPath = GetRestorePath(obj);
-
-               var lObj = obj["projects"]?.Last().ToList();
-
+               //нужно исправить костыль
+               List<JToken> lObj;
+               var lObj1 = obj["projects"]?.First().ToList();
+               try
+               {
+                    var lObj2 = obj["projects"]?.Last().ToList();
+                    lObj = lObj1!.Union(lObj2!).ToList().Distinct().ToList();
+               }
+               catch (Exception)
+               {
+                    lObj = lObj1;
+               }
+               
                NugetPackagesPath = GetNugetPackagesPath(lObj);
                OriginalTargetFrameworks = GetOriginalTargetFrameworks(lObj);
                     

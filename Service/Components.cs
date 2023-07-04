@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Newtonsoft.Json;
 
 namespace SharpieSdk.Library.Service;
@@ -9,8 +7,8 @@ namespace SharpieSdk.Library.Service;
 public abstract class Components
 {
     public readonly string Descriptor = "<?php";
-    public string _pathRoot = String.Empty;
-    public string _pathCustom = String.Empty;
+    public string _pathRoot = "";
+    public string _pathCustom = "";
     public readonly string _pathSdk = "/.sdk";
 
     public string Dirs { get; set; }
@@ -353,6 +351,7 @@ public abstract class Components
             ns = ToRewriteDirs(Namespace);
 
         }
+        
         return _pathRoot + _pathSdk + "/" +  ns;
     }
     protected string ToExtractElement()
