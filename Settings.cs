@@ -1,4 +1,6 @@
-﻿namespace PhpieSdk.Library;
+﻿using System.Collections.Generic;
+
+namespace PhpieSdk.Library;
 
 public class Settings
 {
@@ -11,4 +13,6 @@ public class Settings
     public string rootPath { get; set; } = null;
     public string outputPath { get; set; } = null;
     public string outputScriptPath { get; set; }
+
+    public List<string> ListIgnore = new List<string>();
 }

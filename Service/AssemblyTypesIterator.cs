@@ -13,6 +13,12 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
     
     public void Run()
     {
+        if (IsIgnore())
+        {
+            Console.WriteLine("Ignored: " + Assembly.GetName().Name);
+            return;
+        }
+        
         Type[] types = new Type[]{};
         try
         {
@@ -30,5 +36,10 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
             TypeClear();
         }
         "".WriteLn($"Loaded library: {Assembly.GetName().Name}");
+    }
+
+    private bool IsIgnore()
+    {
+        return Settings.ListIgnore.Contains(Assembly.GetName().Name);
     }
 }
