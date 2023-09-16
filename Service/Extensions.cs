@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Pchp.Core;
 
-namespace SharpieSdk.Library.Service
+namespace PhpieSdk.Library.Service
 {
     public static class SharpieExtension
     {
@@ -21,7 +22,7 @@ namespace SharpieSdk.Library.Service
         public static string ToOriginalName(this string s)
         {
             var str = Regex.Match(
-                s, "^[a-z0-9\\._\\\\]+", RegexOptions.IgnoreCase
+                s, "^[`a-z0-9\\._\\\\]+", RegexOptions.IgnoreCase
             );
             return (str.Success) ? str.ToString() : s;
         }
@@ -49,6 +50,54 @@ namespace SharpieSdk.Library.Service
         {
             return phpValue.ToString().Equals("Pchp.Core.PhpNumber");
         }
+        
+        public static void WriteLn(this string s, string v = "") {
+            Console.WriteLine($"[SDK] {V(v)}" + s);
+        }
+        
+        public static void WriteLn(this object s, string v = "")
+        {
+            Console.WriteLine($"[SDK] {V(v)}" + s.ToString());
+        }
+    
+        public static void WriteLn(this string[] s, string v = "")
+        {
+            Console.WriteLine($"[SDK] {V(v)}" + string.Join(", ", s));
+        }
+        
+        public static void WarnLn(this string s, string v = "")
+        {
+            Console.Error.WriteLine($"[Warning] {V(v)}" + s);
+        }
+
+        private static string V(string v)
+        {
+            return v.Length <= 0 ? "" : $"{v} ";
+        }
+
+        public static bool IsPhpNameError(this string s)
+        {
+            return s.Contains('<') || s.Contains('>');
+        }
+        
+        public static bool IsPhpNameFoundDot(this string s)
+        {
+            return s.Contains('.');
+        }
+        
+        public static bool IsPhpNameGeneric(this string s)
+        {
+            return s.Contains('`') || s.Contains('[') || s.Contains(']');
+        }
+        
+        public static string GetPhpImplName(this string s)
+        {
+            return s.Split('.').Last();
+        }
+        
+        
     }
 }
+
+
 
