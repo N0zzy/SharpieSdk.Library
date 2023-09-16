@@ -15,7 +15,7 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
     {
         if (IsIgnore())
         {
-            Console.WriteLine("Ignored: " + Assembly.GetName().Name);
+            Console.WriteLine("[SDK] Library ignoring: " + Assembly.GetName().Name);
             return;
         }
         
