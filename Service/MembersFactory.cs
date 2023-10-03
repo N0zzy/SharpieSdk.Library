@@ -15,11 +15,13 @@ public abstract class MembersFactory: ManagerFactory
                 Cache.Fields.ContainsKey(field.Name) || 
                 IsEnumFieldValue__(field.Name)
             ) continue;
-            Cache.Fields.Add(field.Name, new TypeFields()
+            Cache.Fields.Add(field.Name, new TypeVariables()
             {
+                Element = "field",
                 CurrentType = Type,
                 Type = field.FieldType,
                 Modifier = field.IsPublic ? "public" : (field.IsPrivate ? "private" : "protected"),
+                _isReadonly = field.IsInitOnly,
                 Number = i
             });
             i++;
@@ -28,17 +30,24 @@ public abstract class MembersFactory: ManagerFactory
 
     protected void AddProperties()
     {
-        // foreach (var property in Type.GetProperties(BindingFlags))
-        // {
-        //     if (!Cache.Properties.ContainsKey(property.Name))
-        //     {
-        //         Cache.Properties.Add(property.Name, new List<TypeProperties>());
-        //     }
-        //     
-        //     Cache.Properties[property.Name].Add(new TypeProperties() {
-        //         
-        //     });
-        // }
+        var i = 0;
+        foreach (var property in Type.GetProperties(BindingFlags))
+        {
+            if(
+                Cache.Fields.ContainsKey(property.Name) || 
+                IsEnumFieldValue__(property.Name)
+            ) continue;
+            
+            Cache.Properties.Add( property.Name,new TypeVariables() {
+                Element = "property",
+                CurrentType = Type,
+                Type = property.PropertyType,
+                Modifier = "public",
+                _isReadonly = property.CanRead && !property.CanWrite,
+                Number = i
+            });
+            i++;
+        }
     }
 
     protected void AddMethods()

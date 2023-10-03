@@ -17,8 +17,8 @@ public class AssemblyType
     public bool isFinal { get; set; } = false;
     public List<string> Implements { get; set; }
     
-    public Dictionary<string, TypeProperties> Properties { get; set; } = new ();
-    public Dictionary<string, TypeFields> Fields { get; set; } = new ();
+    public Dictionary<string, TypeVariables> Properties { get; set; } = new ();
+    public Dictionary<string, TypeVariables> Fields { get; set; } = new ();
     public Dictionary<string, List<TypeEvents>> Events { get; set; } = new ();
     public Dictionary<string, List<TypeMethod>> Methods { get; set; } = new ();
 

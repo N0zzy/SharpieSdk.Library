@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using PhpieSdk.Library.Service;
 
 namespace PhpieSdk.Library;
@@ -40,7 +41,14 @@ public sealed class PhpClass: PhpBaseModel
 
     protected override void Properties()
     {
-
+        foreach (var v in _type.Fields)
+        {
+            PhpBaseProperties(v);
+        }
+        foreach (var v in _type.Properties)
+        {
+            PhpBaseProperties(v);
+        }
     }
 
     protected override void ScriptBuilder(StreamWriter phpFile)
@@ -57,6 +65,7 @@ public sealed class PhpClass: PhpBaseModel
         }
         foreach (var _ in _model) { Script.Add(_); }
         Script.Add(SymbolOBrace);
+        foreach (var _ in _properties) { Script.Add(_); }
         foreach (var _ in _methods) { Script.Add(_); }
         Script.Add(SymbolСBrace);
         phpFile.WriteLine(string.Join("\n", Script));
