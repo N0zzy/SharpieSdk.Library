@@ -13,6 +13,13 @@ public class Settings
     public string rootPath { get; set; } = null;
     public string outputPath { get; set; } = null;
     public string outputScriptPath { get; set; }
-
+    
     public List<string> ListIgnore = new List<string>();
+    /// <summary>
+    /// Make sdk list
+    /// Default: true - make, false - don't make
+    /// </summary>
+    public bool isMakeSdkList { get; set; } = false;
+    
+    public string logLibsLoadedPath { get; set; } = null;
 }

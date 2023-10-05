@@ -13,7 +13,7 @@ public abstract class MembersFactory: ManagerFactory
         {
             if(
                 Cache.Fields.ContainsKey(field.Name) || 
-                IsEnumFieldValue__(field.Name)
+                IsEnumValue__(field.Name)
             ) continue;
             Cache.Fields.Add(field.Name, new TypeVariables()
             {
@@ -34,10 +34,9 @@ public abstract class MembersFactory: ManagerFactory
         foreach (var property in Type.GetProperties(BindingFlags))
         {
             if(
-                Cache.Fields.ContainsKey(property.Name) || 
-                IsEnumFieldValue__(property.Name)
+                Cache.Properties.ContainsKey(property.Name) || 
+                IsEnumValue__(property.Name)
             ) continue;
-            
             Cache.Properties.Add( property.Name,new TypeVariables() {
                 Element = "property",
                 CurrentType = Type,
@@ -63,8 +62,8 @@ public abstract class MembersFactory: ManagerFactory
             
             Cache.Methods[methodName].Add(new TypeMethod()
             {
-                Name = methodName,//текущее имя метода после проверки на оригинальность
-                OriginalName = method.Name,//может не совпадать из за имплементации
+                Name = methodName,
+                OriginalName = method.Name,
                 ReturnType =  method.ReturnType.Namespace + "." + method.ReturnType.Name,
                 Modifier = method.IsPublic ? "public" : (method.IsPrivate ? "private" : "protected"),
                 IsAbstract = method.IsAbstract,

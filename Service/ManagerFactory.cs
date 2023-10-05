@@ -15,7 +15,7 @@ public abstract class ManagerFactory
     protected BindingFlags BindingFlags { get; set; } 
         = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic;
 
-    protected bool IsEnumFieldValue__(string name)
+    protected bool IsEnumValue__(string name)
     {
         return (Cache.Model == "enum" && name == "value__");
     }
