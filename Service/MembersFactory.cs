@@ -37,11 +37,21 @@ public abstract class MembersFactory: ManagerFactory
                 Cache.Properties.ContainsKey(property.Name) || 
                 IsEnumValue__(property.Name)
             ) continue;
+
+            string modifier;
+
+            if (property.GetMethod != null && property.GetMethod.IsPublic)
+                modifier = "public";
+            else if (property.SetMethod != null && property.SetMethod.IsFamily)
+                modifier = "protected";
+            else 
+                modifier = "private";
+            
             Cache.Properties.Add( property.Name,new TypeVariables() {
                 Element = "property",
                 CurrentType = Type,
                 Type = property.PropertyType,
-                Modifier = "public",
+                Modifier = modifier,
                 _isReadonly = property.CanRead && !property.CanWrite,
                 Number = i
             });
