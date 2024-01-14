@@ -166,8 +166,11 @@ public abstract class PhpBaseModel: PhpBaseParameters
                 if (_commentsMethods.Count > 0)
                     _commentsMethods.Add(string.Join("\n", _commentsMethods));
                 commentMethodsOverride.Add($"\t * @uses {_type.Name}MethodsOverride::{name}_{i} ({_args})");
-                var t = PhpBaseTypes.Convert(m.ReturnType);
-                _methodsTraitOverride.Add("\t * @return \\" +  t.ToReplaceDot("\\").Replace("`", "_"));
+                if(m.Name != "__construct")
+                {
+                    var t = PhpBaseTypes.Convert(m.ReturnType);
+                    _methodsTraitOverride.Add("\t * @return \\" +  t.ToReplaceDot("\\").Replace("`", "_"));
+                }
                 _methodsTraitOverride.Add("\t */");
                 _methodsTraitOverride.Add($"\t#[MethodOverride] {m.Modifier} {staticMethod} function {name}_{i}({_args})" + "{}");
                 i++;
@@ -183,7 +186,8 @@ public abstract class PhpBaseModel: PhpBaseParameters
         TypeMethod method,
         string staticMethod, 
         string args,
-        string name)
+        string name
+    )
     {
         _methods.Add("\t/**");
         if(_commentsMethods.Count > 0 ) 
@@ -194,16 +198,22 @@ public abstract class PhpBaseModel: PhpBaseParameters
             _methods.Add("\t * " + WarningDeprecated);
             _methods.Add("\t * @return @deprecated" );
         }
-        else
+
+        if (method.Name != "__construct")
         {
             var t = PhpBaseTypes.Convert(method.ReturnType);
             _methods.Add("\t * @return \\" + t.ToReplaceDot("\\").Replace("`", "_"));
         }
+
         _methods.Add("\t */");
         _methods.Add($"\t{method.Modifier} {staticMethod} function {name}({args})" + "{}");
     }
 
-    private void PhpMethodSingleOverrideBuilder(List<string> commentMethodsOverride, string staticMethod, string name)
+    private void PhpMethodSingleOverrideBuilder(
+        List<string> commentMethodsOverride, 
+        string staticMethod, 
+        string name
+    )
     {
         _methods.Add("\t/**");
         if(commentMethodsOverride.Count > 0) 

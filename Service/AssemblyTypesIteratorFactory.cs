@@ -54,6 +54,7 @@ public abstract class AssemblyTypesIteratorFactory: MembersFactory
     {
         AddFields();
         AddProperties();
+        AddConstructs();
         AddMethods();
     }
 

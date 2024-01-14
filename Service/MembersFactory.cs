@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace PhpieSdk.Library.Service;
 
@@ -58,12 +59,41 @@ public abstract class MembersFactory: ManagerFactory
             i++;
         }
     }
+    
+    
+    protected void AddConstructs()
+    {
+        foreach (var constructor in Type.GetConstructors())
+        {
+            Console.WriteLine(Type.FullName);
+            
+            var methodName = "__construct";
+
+            if (!Cache.Methods.ContainsKey(methodName))
+            {
+                Cache.Methods.Add(methodName, new List<TypeMethod>());
+            }
+            
+            Cache.Methods[methodName].Add(new TypeMethod() {
+                Name = methodName,
+                OriginalName = methodName,
+                Modifier = constructor.IsPublic ? "public" : (constructor.IsPrivate ? "private" : "protected"),
+                IsAbstract = false,
+                IsStatic = false,
+                ReturnType = null,
+                Args = GetArgs(constructor)
+            });
+        }
+    }
+    
+
 
     protected void AddMethods()
     {
         foreach (var method in Type.GetMethods(BindingFlags))
         {
-            var methodName = method.Name.IsPhpNameFoundDot() ? method.Name.GetPhpImplName() : method.Name;
+            var methodName = method.Name.IsPhpNameFoundDot() 
+                ? method.Name.GetPhpImplName() : method.Name;
             
             if (!Cache.Methods.ContainsKey(methodName))
             {
@@ -78,29 +108,29 @@ public abstract class MembersFactory: ManagerFactory
                 Modifier = method.IsPublic ? "public" : (method.IsPrivate ? "private" : "protected"),
                 IsAbstract = method.IsAbstract,
                 IsStatic = method.IsStatic,
-                Args = method.GetParameters().Select((p ) =>
-                {
-                    try
-                    {
-                        return new PhpArgs()
-                        {
-                            Name = p.Name,
-                            Type = p.ParameterType.Namespace + "." + p.ParameterType.Name ,
-                            Value = p.DefaultValue
-                        };
-                    }
-                    catch (Exception)
-                    {
-                        return new PhpArgs()
-                        {
-                            Name = p.Name,
-                            Type = p.ParameterType.Namespace + "." + p.ParameterType.Name,
-                            Value = p.RawDefaultValue
-                        };
-                    }
-
-                }).ToList(),
+                Args = GetArgs(method)
             });
         }
+    }
+    
+    private List<PhpArgs> GetArgs(ConstructorInfo method)
+    {
+        return method.GetParameters().Select(GetParameters).ToList();
+    }
+    
+    private List<PhpArgs> GetArgs(MethodInfo method)
+    {
+        return method.GetParameters().Select(GetParameters).ToList();
+    }
+
+    private PhpArgs GetParameters(ParameterInfo parameter)
+    {
+        var phpArgs = new PhpArgs
+        {
+            Name = parameter.Name,
+            Type = parameter.ParameterType.Namespace + "." + parameter.ParameterType.Name,
+            Value = parameter.DefaultValue ?? parameter.RawDefaultValue
+        };
+        return phpArgs;
     }
 }
