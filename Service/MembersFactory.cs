@@ -23,6 +23,7 @@ public abstract class MembersFactory: ManagerFactory
                 Type = field.FieldType,
                 Modifier = field.IsPublic ? "public" : (field.IsPrivate ? "private" : "protected"),
                 _isReadonly = field.IsInitOnly,
+                _isStatic = field.IsStatic,
                 Number = i
             });
             i++;

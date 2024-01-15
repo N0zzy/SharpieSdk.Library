@@ -29,4 +29,11 @@ public struct PhpBaseTypes
         string _type = type.ToLower();
         return Types.ContainsKey(_type) ? $"{type}|{Types[_type]}" : type;
     }
+
+    public static string Extract(string argType, bool isSeparator = false)
+    {
+        return (isSeparator ? "\\" : "") + Convert(argType)
+            .ToReplaceDot("\\")
+            .Replace("`", "_");
+    }
 }

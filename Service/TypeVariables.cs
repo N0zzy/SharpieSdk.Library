@@ -9,5 +9,7 @@ public class TypeVariables
     public Type CurrentType { get; set; }
     public string Modifier { get; set; }
     public int Number { get; set; }
+    
+    public bool _isStatic { get; set; } = false;
     public bool _isReadonly { get; set; } = false;
 }

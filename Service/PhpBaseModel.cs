@@ -151,12 +151,8 @@ public abstract class PhpBaseModel: PhpBaseParameters
             var _args = GetArgsMethod(m.Args);
             if (countMethods == 1)
             {
-                if (_type.BaseType != null)
-                {
-                    if (IsParentMethod(m))
-                    {
-                        continue;
-                    }
+                if (_type.BaseType != null && IsParentMethod(m)){
+                    continue;
                 }
                 PhpMethodSingleBuilder(m, staticMethod, _args, name);
             }
@@ -166,10 +162,17 @@ public abstract class PhpBaseModel: PhpBaseParameters
                 if (_commentsMethods.Count > 0)
                     _commentsMethods.Add(string.Join("\n", _commentsMethods));
                 commentMethodsOverride.Add($"\t * @uses {_type.Name}MethodsOverride::{name}_{i} ({_args})");
+                
+                foreach (var _arg in m.Args)
+                {
+                    _methodsTraitOverride
+                        .Add($"\t * @var {PhpBaseTypes.Extract(_arg.Type, true)} ${_arg.Name}");
+                }
+
                 if(m.Name != "__construct")
                 {
                     var t = PhpBaseTypes.Convert(m.ReturnType);
-                    _methodsTraitOverride.Add("\t * @return \\" +  t.ToReplaceDot("\\").Replace("`", "_"));
+                    _methodsTraitOverride.Add("\t * @return " +  PhpBaseTypes.Extract(t, true));
                 }
                 _methodsTraitOverride.Add("\t */");
                 _methodsTraitOverride.Add($"\t#[MethodOverride] {m.Modifier} {staticMethod} function {name}_{i}({_args})" + "{}");
@@ -202,7 +205,7 @@ public abstract class PhpBaseModel: PhpBaseParameters
         if (method.Name != "__construct")
         {
             var t = PhpBaseTypes.Convert(method.ReturnType);
-            _methods.Add("\t * @return \\" + t.ToReplaceDot("\\").Replace("`", "_"));
+            _methods.Add("\t * @return " +  PhpBaseTypes.Extract(t, true));
         }
 
         _methods.Add("\t */");
@@ -226,37 +229,38 @@ public abstract class PhpBaseModel: PhpBaseParameters
     protected void PhpBaseProperties(KeyValuePair<string, TypeVariables> prop)
     {
         if(prop.Key.Contains("<") || prop.Key.Contains(">") || prop.Value.Modifier.Contains("private")) return;
+        
         _properties.Add("\t/**");
-
-        string typeVar;
-        string typeComment = "\\" + PhpBaseTypes.Convert(prop.Value.Type.ToString())
-            .ToReplaceDot("\\").Replace("`", "_");
+        
+        string @readonly = String.Empty;
+        string @static  = prop.Value._isStatic ? "static " : "";
+        
+        string typeComment = PhpBaseTypes.Extract(prop.Value.Type.ToString(), true);
         string genericComment = String.Empty;
         
         if (prop.Value.Type.IsGenericType)
         {
             genericComment = "generic-type: " + typeComment.Remove(0,1) + "<br>";
-            typeVar = "mixed";
             if (!typeComment.Contains("[]"))
             {
-                typeComment = typeComment.Split("[")[0] + "|" + typeVar;
+                typeComment = typeComment.Split("[")[0];
             }
         }
-        else
-        {
-            typeVar = typeComment;
-        }
-        _properties.Add($"\t * @var {typeComment}");
-
+        
         if (!String.IsNullOrEmpty(genericComment))
         {
             _properties.Add($"\t * {genericComment}");
         }
-
-        var @readonly = prop.Value._isReadonly ? $"readonly {typeVar} " : "";
         
+        _properties.Add($"\t * @var {typeComment}");
         _properties.Add("\t * @" + prop.Value.Element);
+        
+        if (prop.Value._isReadonly)
+        {
+            _properties.Add("\t * @since readonly");
+        }
+        
         _properties.Add("\t */");
-        _properties.Add($"\t{prop.Value.Modifier} {@readonly}${prop.Key};");
+        _properties.Add($"\t{prop.Value.Modifier} {@readonly}{@static}${prop.Key};");
     }
 }
