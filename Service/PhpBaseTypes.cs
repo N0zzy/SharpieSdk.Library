@@ -14,11 +14,17 @@ public struct PhpBaseTypes
         ["system.double"] = "double",
         ["system.float"] = "float",
         ["system.array"] = "array",
+        ["system.int32[]"] = "array",
+        ["system.int64[]"] = "array",
+        ["system.string[]"] = "array",
+        ["system.object[]"] = "array",
+        ["system.double[]"] = "array",
+        ["system.float[]"] = "array",
     };
 
     public static string Convert(string type)
     {
-        var _type = type.ToLower();
+        string _type = type.ToLower();
         return Types.ContainsKey(_type) ? $"{type}|{Types[_type]}" : type;
     }
 }
