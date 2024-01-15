@@ -25,15 +25,13 @@ public sealed class PhpScriptGenerator
 
     private void SetRootPath()
     {
-        if (_settings.rootPath == null)
+        if (String.IsNullOrEmpty(_settings.rootPath))
         {
             _settings.rootPath = _settings
                 .currentPath
                 .ToReversSlash()
                 .Replace($"/bin/{_settings.targetBuild}/{_settings.targetFramework}", "");
         }
-        
-        "".WriteLn("root path: " + _settings.rootPath);
     }
     
     private void SetOutputPath()
@@ -58,10 +56,8 @@ public sealed class PhpScriptGenerator
             : _settings.sdkIgnore;
         
         FileNotFoundException(path);
-        
-        Console.WriteLine(path);
-        
-        string s;
+
+        string s = String.Empty;
         StreamReader f = new StreamReader(path);
         while ((s = f.ReadLine()) != null)
         {

@@ -15,8 +15,7 @@ public class AssemblyIterator
     {
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
-            AssemblyTypesIterator iterator = new AssemblyTypesIterator(assembly, _settings);
-            iterator.Run();
+            new AssemblyTypesIterator(assembly, _settings).Run();
         }
     }
 }

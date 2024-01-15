@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PhpieSdk.Library;
 
@@ -9,8 +10,9 @@ public class Settings
     public string sdkIgnore { get; set; }
     public string sdkName { get; set; }
     public string currentPath { get; set; }
-    public string targetBuild { get; set; }
-    public string rootPath { get; set; } = null;
+    public string targetBuild { get; set; } = String.Empty;
+    public string rootPath { get; set; } = String.Empty;
+    public string libsPath { get; set; } = String.Empty;
     public string outputPath { get; set; } = null;
     public string outputScriptPath { get; set; }
     

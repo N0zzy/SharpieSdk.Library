@@ -10,6 +10,22 @@ struct AssemblyLoader
     {
         return IsWindows() ? "dll" : "so";
     }
+
+    private string GetLibraryPath(Settings settings)
+    {
+        string libsPath = String.Empty;
+        if (String.IsNullOrEmpty(settings.libsPath))
+        {
+            string b = !String.IsNullOrEmpty(settings.targetBuild)
+                ? $"/bin/{settings.targetBuild}"
+                : "";
+            string f = !String.IsNullOrEmpty(settings.targetFramework)
+                ? $"/{settings.targetFramework}"
+                : "";
+            libsPath = settings.rootPath + $"{b}{f}";
+        }
+        return Directory.Exists(libsPath) ? libsPath : settings.rootPath;
+    }
     
     private bool IsWindows()
     {
@@ -18,19 +34,22 @@ struct AssemblyLoader
     
     public void Run(Settings settings)
     {
-        "".WriteLn("Loading libraries from " + settings.currentPath);
         var libName = GetLibraryExtension();
-        foreach (var f in Directory.GetFiles(settings.currentPath, $"*.{libName}"))
+        var libPath = GetLibraryPath(settings);
+        
+        "".WriteLn("loading libraries from " + libPath);
+        
+        foreach (var f in Directory.GetFiles(libPath, $"*.{libName}"))
         {
             try
             {
-                Assembly.LoadFile(f);
+                Assembly.LoadFile(f.ToReversSlash());
             }
             catch (Exception)
             {
                 //ignore
             }
         }
-        "".WriteLn("Libraries loaded...");
+        "".WriteLn("libraries loaded...");
     }
 }

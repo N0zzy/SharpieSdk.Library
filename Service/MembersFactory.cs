@@ -65,8 +65,6 @@ public abstract class MembersFactory: ManagerFactory
     {
         foreach (var constructor in Type.GetConstructors())
         {
-            Console.WriteLine(Type.FullName);
-            
             var methodName = "__construct";
 
             if (!Cache.Methods.ContainsKey(methodName))

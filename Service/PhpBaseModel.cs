@@ -226,10 +226,11 @@ public abstract class PhpBaseModel: PhpBaseParameters
     protected void PhpBaseProperties(KeyValuePair<string, TypeVariables> prop)
     {
         if(prop.Key.Contains("<") || prop.Key.Contains(">") || prop.Value.Modifier.Contains("private")) return;
-        var @readonly = prop.Value._isReadonly ? "readonly " : "";
+        var type = "\\" + prop.Value.Type.ToString().ToReplaceDot("\\").Replace("`", "_");
+        var @readonly = prop.Value._isReadonly ? $"readonly {type}" : "";
         
         _properties.Add("\t/**");
-        _properties.Add("\t * @var \\" + prop.Value.Type.ToString().ToReplaceDot("\\").Replace("`", "_"));
+        _properties.Add($"\t * @var {type}");
         _properties.Add("\t * @" + prop.Value.Element);
         _properties.Add("\t */");
         _properties.Add($"\t{prop.Value.Modifier} {@readonly}${prop.Key};");

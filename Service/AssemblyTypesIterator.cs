@@ -16,7 +16,7 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
         var name = Assembly.GetName().Name;
         if (IsIgnore())
         {
-            Console.WriteLine("[SDK] Library ignoring: " + name);
+            "".WriteLn("library ignoring: " + name);
             return;
         }
         
@@ -28,7 +28,7 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
         catch (Exception)
         {
             PhpieLibrary.Failed.Add(name);
-            "".WriteLn($" --- Error loading {name} --- ");
+            "".WriteLn($" --- error loading {name} --- ");
         }
 
         foreach (var type in types)
@@ -37,7 +37,7 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
             TypeCreate();
             TypeClear();
         }
-        "".WriteLn($"Loaded library: {name}");
+        "".WriteLn($"loaded library: {name}");
         PhpieLibrary.Loaded.Add(name);
     }
 
