@@ -3,7 +3,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <Configurations>Debug</Configurations>
         <Platforms>AnyCPU</Platforms>
-        <Version>0.6.0</Version>
+        <Version>0.6.1</Version>
         <Title>PhpieSdk.Library</Title>
         <Description>PhpieSdk.Library</Description>
         <PackageProjectUrl>https://github.com/N0zzy/PhpieSdk.Library</PackageProjectUrl>
