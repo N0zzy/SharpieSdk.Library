@@ -5,16 +5,16 @@ namespace PhpieSdk.Library;
 
 public class Settings
 {
-    public string targetFramework { get; set; }
-    public string sdkPath { get; set; }
-    public string sdkIgnore { get; set; }
-    public string sdkName { get; set; }
-    public string currentPath { get; set; }
+    public string targetFramework { get; set; } = String.Empty;
+    public string sdkPath { get; set; } = String.Empty;
+    public string sdkIgnore { get; set; } = String.Empty;
+    public string sdkName { get; set; } = String.Empty;
+    public string currentPath { get; set; } = String.Empty;
     public string targetBuild { get; set; } = String.Empty;
     public string rootPath { get; set; } = String.Empty;
     public string libsPath { get; set; } = String.Empty;
     public string outputPath { get; set; } = null;
-    public string outputScriptPath { get; set; }
+    public string outputScriptPath { get; set; } = String.Empty;
     
     public List<string> ListIgnore = new List<string>();
     /// <summary>
