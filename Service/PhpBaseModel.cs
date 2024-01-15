@@ -226,13 +226,35 @@ public abstract class PhpBaseModel: PhpBaseParameters
     protected void PhpBaseProperties(KeyValuePair<string, TypeVariables> prop)
     {
         if(prop.Key.Contains("<") || prop.Key.Contains(">") || prop.Value.Modifier.Contains("private")) return;
-        
-        var type = "\\" + PhpBaseTypes.Convert(prop.Value.Type.ToString())
-            .ToReplaceDot("\\").Replace("`", "_");
-        var @readonly = prop.Value._isReadonly ? $"readonly {type} " : "";
-        
         _properties.Add("\t/**");
-        _properties.Add($"\t * @var {type}");
+
+        string typeVar;
+        string typeComment = "\\" + PhpBaseTypes.Convert(prop.Value.Type.ToString())
+            .ToReplaceDot("\\").Replace("`", "_");
+        string genericComment = String.Empty;
+        
+        if (prop.Value.Type.IsGenericType)
+        {
+            genericComment = "generic-type: " + typeComment.Remove(0,1) + "<br>";
+            typeVar = "mixed";
+            if (!typeComment.Contains("[]"))
+            {
+                typeComment = typeComment.Split("[")[0] + "|" + typeVar;
+            }
+        }
+        else
+        {
+            typeVar = typeComment;
+        }
+        _properties.Add($"\t * @var {typeComment}");
+
+        if (!String.IsNullOrEmpty(genericComment))
+        {
+            _properties.Add($"\t * {genericComment}");
+        }
+
+        var @readonly = prop.Value._isReadonly ? $"readonly {typeVar} " : "";
+        
         _properties.Add("\t * @" + prop.Value.Element);
         _properties.Add("\t */");
         _properties.Add($"\t{prop.Value.Modifier} {@readonly}${prop.Key};");

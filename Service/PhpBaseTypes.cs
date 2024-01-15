@@ -13,6 +13,7 @@ public struct PhpBaseTypes
         ["system.object"] = "object",
         ["system.double"] = "double",
         ["system.float"] = "float",
+        ["system.boolean"] = "bool",
         ["system.array"] = "array",
         ["system.int32[]"] = "array",
         ["system.int64[]"] = "array",
@@ -20,6 +21,7 @@ public struct PhpBaseTypes
         ["system.object[]"] = "array",
         ["system.double[]"] = "array",
         ["system.float[]"] = "array",
+        ["system.boolean[]"] = "array",
     };
 
     public static string Convert(string type)
