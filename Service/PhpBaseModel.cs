@@ -226,8 +226,10 @@ public abstract class PhpBaseModel: PhpBaseParameters
     protected void PhpBaseProperties(KeyValuePair<string, TypeVariables> prop)
     {
         if(prop.Key.Contains("<") || prop.Key.Contains(">") || prop.Value.Modifier.Contains("private")) return;
-        var type = "\\" + prop.Value.Type.ToString().ToReplaceDot("\\").Replace("`", "_");
-        var @readonly = prop.Value._isReadonly ? $"readonly {type}" : "";
+        
+        var type = "\\" + PhpBaseTypes.Convert(prop.Value.Type.ToString())
+            .ToReplaceDot("\\").Replace("`", "_");
+        var @readonly = prop.Value._isReadonly ? $"readonly {type} " : "";
         
         _properties.Add("\t/**");
         _properties.Add($"\t * @var {type}");
