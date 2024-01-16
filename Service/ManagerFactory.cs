@@ -5,10 +5,11 @@ namespace PhpieSdk.Library.Service;
 
 public abstract class ManagerFactory
 {
+    protected Settings Settings { get; set; }
     protected Assembly Assembly { get; set; }
+    protected string AssemblyName { get; set; }
     protected Type Type { get; set; }
     protected string Name => Type.Name.ToOriginalName().Replace("`", "_");
-    protected Settings Settings { get; set; }
     
     protected AssemblyType Cache = null;
     protected int ModelCount { get; set; } = 0;

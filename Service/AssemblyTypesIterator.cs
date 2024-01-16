@@ -5,21 +5,42 @@ namespace PhpieSdk.Library.Service;
 
 public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
 {
-    public AssemblyTypesIterator(Assembly assembly, Settings settings)
+    public AssemblyTypesIterator(Settings settings)
+    {
+        Settings = settings;
+    }
+    
+    public AssemblyTypesIterator SetAssembly(Assembly assembly)
     {
         Assembly = assembly;
-        Settings = settings;
+        return this;
     }
     
     public void Run()
     {
-        var name = Assembly.GetName().Name;
+        AssemblyName = Assembly.GetName().Name;
         if (IsIgnore())
         {
-            "".WriteLn("library ignoring: " + name);
+            "".WriteLn("library ignoring: " + AssemblyName);
             return;
         }
-        
+        foreach (var type in ExtractTypes())
+        {
+            Type = type;
+            TypeCreate();
+            TypeClear();
+        }
+        "".WriteLn($"loaded library: {AssemblyName}");
+        PhpieLibrary.Loaded.Add(AssemblyName);
+    }
+
+    private bool IsIgnore()
+    {
+        return Settings.ListIgnore.Contains(AssemblyName);
+    }
+    
+    private Type[] ExtractTypes()
+    {
         Type[] types = new Type[]{};
         try
         {
@@ -27,22 +48,9 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
         }
         catch (Exception)
         {
-            PhpieLibrary.Failed.Add(name);
-            "".WriteLn($" --- error loading {name} --- ");
+            PhpieLibrary.Failed.Add(AssemblyName);
+            "".WriteLn($" --- error loading {AssemblyName} --- ");
         }
-
-        foreach (var type in types)
-        {
-            Type = type;
-            TypeCreate();
-            TypeClear();
-        }
-        "".WriteLn($"loaded library: {name}");
-        PhpieLibrary.Loaded.Add(name);
-    }
-
-    private bool IsIgnore()
-    {
-        return Settings.ListIgnore.Contains(Assembly.GetName().Name);
+        return types;
     }
 }
