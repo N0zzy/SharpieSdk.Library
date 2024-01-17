@@ -10,15 +10,14 @@ public class PhpEnum: PhpBaseModel
 
     protected override void Model()
     {
-        var implements = GetImpsInterfaces();
-        _model.Add($"enum {_type.Name}{implements}");
+        _model.Add($"enum {_type.Name}{GetImpsInterfaces()}");
     }
 
     protected override void Methods()
     {
         foreach (var method in _type.Methods)
         {
-            var methodName = method.Key;
+            string methodName = method.Key;
             if(methodName.IsPhpNameError()) continue;
             if (methodName.IsPhpNameFoundDot())
             {
@@ -44,10 +43,10 @@ public class PhpEnum: PhpBaseModel
                 var v = Convert.ChangeType(value, enumUnderlyingType);
                 _properties.Add($"\tcase {field.Key} = {v};");
             }
-            catch(Exception)
+            catch
             {
                 _properties.Add($"\tcase {field.Key};");
-            }
+            } 
         }
     }
 

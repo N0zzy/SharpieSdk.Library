@@ -42,7 +42,7 @@ public abstract class AssemblyTypesIteratorFactory: MembersFactory
             Extends = Type.BaseType == null 
                 ? "" 
                 : "\\" + (Type.BaseType.Namespace + "." + Type.BaseType.Name).ToReplaceDot("\\"),
-            Implements = Type.GetInterfaces().Select(i => ("\\" + i.Namespace + "." + i.Name).ToReplaceDot("\\")).ToList(),
+            Implements = Type.GetInterfaces().Select(i => ("\\" + i.Namespace + "." + i.Name).ToReplaceDot("\\")).ToArray(),
             FullName = Type.FullName
         };
 
@@ -84,7 +84,7 @@ public abstract class AssemblyTypesIteratorFactory: MembersFactory
     
     private void MakeDirectory()
     {
-        var @namespace = string.IsNullOrEmpty(Type.Namespace)
+        string @namespace = string.IsNullOrEmpty(Type.Namespace)
             ? ".hidden" : Type.Namespace.ToReplaceDot("/");
         
         Settings.outputScriptPath = Settings.outputPath + "/" + Settings.sdkName + "/" + @namespace;

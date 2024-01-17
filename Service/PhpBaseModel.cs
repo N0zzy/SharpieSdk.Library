@@ -12,11 +12,12 @@ public abstract class PhpBaseModel: PhpBaseParameters
 {
     protected List<string> Script = new();
 
-    protected readonly string Descriptor = "<?php";
+    private readonly string Descriptor = "<?php";
     protected readonly string SymbolOBrace = "{";
     protected readonly string SymbolСBrace = "}";
     protected readonly string WarningDeprecated = "@deprecated this element should not be used by you because it will break your program";
-    protected readonly BindingFlags BindingFlags
+
+    private readonly BindingFlags BindingFlags
         = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic;
     
     protected abstract void Model();
@@ -68,48 +69,52 @@ public abstract class PhpBaseModel: PhpBaseParameters
         _model.Add(" */");
     }
     
-    private List<string> GetInterfaces(List<string> impls)
+    private Array GetInterfaces(Array impls)
     {
-        var interfaces = new List<string>();
+        Array interfaces = new string[impls.Length];
+        int i = 0;
         foreach (var impl in impls)
         {
-            interfaces.Add(impl.Replace("`", "_"));
+            interfaces.SetValue(impl, i);
+            i++;
         }
         return interfaces;
     }
 
     protected string GetImpsInterfaces()
     {
-       return  _type.Implements.Count > 0 
+       return _type.Implements.Length > 0 
             ? " implements \n\t" + string.Join(",\n\t", GetInterfaces(_type.Implements)) 
             : "";
     }
 
     private bool IsParentMethod(TypeMethod method)
     {
+        MethodInfo baseMethod;
+        MethodInfo derivedMethod;
         try
-        {                        
-            MethodInfo baseMethod = _type.BaseType.GetMethod(method.Name, BindingFlags);
-            MethodInfo derivedMethod = _type.CurrentType.GetMethod(method.Name, BindingFlags);
-
-            if (baseMethod == null || derivedMethod == null)
-            {
-                return false;
-            }
-                        
-            var modifierBaseMethod = baseMethod.IsPublic 
-                ? "public " : (baseMethod.IsPrivate ? "private " : "");
-            var modifierDerivedMethod = derivedMethod.IsPublic 
-                ? "public " : (derivedMethod.IsPrivate ? "private " : "");
-
-            if (modifierBaseMethod + baseMethod == modifierDerivedMethod + derivedMethod)
-            {
-                return true;
-            }
-        }
-        catch (Exception)
         {
-            //ignore
+             baseMethod = _type.BaseType.GetMethod(method.Name, BindingFlags, null, new Type[] { typeof(int) }, null);
+             derivedMethod = _type.CurrentType.GetMethod(method.Name, BindingFlags, null, new Type[] { typeof(int) }, null);
+        }
+        catch
+        {
+            return false;
+        }
+        
+        if (baseMethod == null || derivedMethod == null)
+        {
+            return false;
+        }
+
+        string modifierBaseMethod = baseMethod.IsPublic 
+            ? "public " : (baseMethod.IsPrivate ? "private " : "");
+        string modifierDerivedMethod = derivedMethod.IsPublic 
+            ? "public " : (derivedMethod.IsPrivate ? "private " : "");
+
+        if (modifierBaseMethod + baseMethod == modifierDerivedMethod + derivedMethod)
+        {
+            return true;
         }
         return false;
     }
@@ -119,7 +124,7 @@ public abstract class PhpBaseModel: PhpBaseParameters
         List<string> args = new List<string>();
         foreach (var arg in mArgs)
         {
-            var t = PhpBaseTypes.Convert(arg.Type);
+            string t = PhpBaseTypes.Convert(arg.Type);
             _commentsMethods.Add($"\t * @param \\{t.ToReplaceDot("\\").Replace("`", "_")} ${arg.Name}");
             args.Add($"${arg.Name}");
         }
@@ -128,8 +133,7 @@ public abstract class PhpBaseModel: PhpBaseParameters
     
     protected void PhpImplMethod(KeyValuePair<string, List<TypeMethod>> method)
     {
-        var methodName = method.Key.GetPhpImplName();
-        PhpBodyMethod(method, methodName);
+        PhpBodyMethod(method, method.Key.GetPhpImplName());
     }
     
     protected virtual void PhpBaseMethod(KeyValuePair<string, List<TypeMethod>> method)
@@ -139,16 +143,16 @@ public abstract class PhpBaseModel: PhpBaseParameters
 
     protected virtual void PhpBodyMethod(KeyValuePair<string, List<TypeMethod>> method, string name)
     {
-        var countMethods = method.Value.Count;
-        var staticMethod = "";
-        var i = 1;
+        int countMethods = method.Value.Count;
+        string staticMethod = String.Empty;
+        int i = 1;
         List<string> commentMethodsOverride = new List<string>();
         foreach (var m in method.Value)
         {
             if(m.Name.IsPhpNameError()) continue;
             staticMethod = m.IsStatic ? "static" : "";
             _commentsMethods = new List<string>();
-            var _args = GetArgsMethod(m.Args);
+            string _args = GetArgsMethod(m.Args);
             if (countMethods == 1)
             {
                 if (_type.BaseType != null && IsParentMethod(m)){
@@ -171,7 +175,7 @@ public abstract class PhpBaseModel: PhpBaseParameters
 
                 if(m.Name != "__construct")
                 {
-                    var t = PhpBaseTypes.Convert(m.ReturnType);
+                    string t = PhpBaseTypes.Convert(m.ReturnType);
                     _methodsTraitOverride.Add("\t * @return " +  PhpBaseTypes.Extract(t, true));
                 }
                 _methodsTraitOverride.Add("\t */");
@@ -204,8 +208,9 @@ public abstract class PhpBaseModel: PhpBaseParameters
 
         if (method.Name != "__construct")
         {
-            var t = PhpBaseTypes.Convert(method.ReturnType);
-            _methods.Add("\t * @return " +  PhpBaseTypes.Extract(t, true));
+            _methods.Add("\t * @return " +  PhpBaseTypes.Extract(
+                PhpBaseTypes.Convert(method.ReturnType), true
+            ));
         }
 
         _methods.Add("\t */");
@@ -233,10 +238,9 @@ public abstract class PhpBaseModel: PhpBaseParameters
         _properties.Add("\t/**");
         
         string @readonly = String.Empty;
-        string @static  = prop.Value._isStatic ? "static " : "";
-        
-        string typeComment = PhpBaseTypes.Extract(prop.Value.Type.ToString(), true);
-        string genericComment = String.Empty;
+        string  @static  = prop.Value._isStatic ? "static " : "";
+        string  typeComment = PhpBaseTypes.Extract(prop.Value.Type.ToString(), true);
+        string  genericComment = String.Empty;
         
         if (prop.Value.Type.IsGenericType)
         {

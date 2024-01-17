@@ -11,11 +11,11 @@ public sealed class PhpClass: PhpBaseModel
 
     protected override void Model()
     {
-        var extends = string.IsNullOrEmpty(_type.Extends) 
+        string extends = string.IsNullOrEmpty(_type.Extends) 
             ? "" 
             : " extends " + _type.Extends.Replace("`", "_");
-        var implements = GetImpsInterfaces();
-        var final = _type.isFinal 
+        string implements = GetImpsInterfaces();
+        string final = _type.isFinal 
             ? "final " 
             : "";
         _model.Add($"{final}class {_type.Name}{extends}{implements}");
@@ -25,7 +25,7 @@ public sealed class PhpClass: PhpBaseModel
     {
         foreach (var method in _type.Methods)
         {
-            var methodName = method.Key;
+            string methodName = method.Key;
             if(methodName.IsPhpNameError()) continue;
             if (methodName.IsPhpNameFoundDot())
             {

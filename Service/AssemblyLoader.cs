@@ -34,22 +34,20 @@ struct AssemblyLoader
     
     public void Run(Settings settings)
     {
-        var libName = GetLibraryExtension();
-        var libPath = GetLibraryPath(settings);
-        
-        "".WriteLn("loading libraries from " + libPath);
+        string libName = GetLibraryExtension();
+        string libPath = GetLibraryPath(settings);
+
+        if (!settings.isViewLibsLoaded)
+        {
+            "".WriteLn("loading libraries from " + libPath);
+        }
         
         foreach (var f in Directory.GetFiles(libPath, $"*.{libName}"))
         {
-            try
+            if (File.Exists(f.ToReversSlash()))
             {
                 Assembly.LoadFile(f.ToReversSlash());
             }
-            catch (Exception)
-            {
-                //ignore
-            }
         }
-        "".WriteLn("libraries loaded...");
     }
 }

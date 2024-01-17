@@ -10,7 +10,11 @@
         <RepositoryUrl>https://github.com/N0zzy/PhpieSdk.Library</RepositoryUrl>
         <RepositoryType>library</RepositoryType>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
-        <RootNamespace>PhpieSdk.Library</RootNamespace>
+<!--        <PublishAot>true</PublishAot>-->
+<!--        <IsAotCompatible>true</IsAotCompatible>-->
+<!--        <StripSymbols>false</StripSymbols>-->
+<!--        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>-->
+<!--        <InvariantGlobalization>true</InvariantGlobalization>-->
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

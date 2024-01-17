@@ -21,7 +21,7 @@ namespace PhpieSdk.Library.Service
         
         public static string ToOriginalName(this string s)
         {
-            var str = Regex.Match(
+            Match str = Regex.Match(
                 s, "^[`a-z0-9\\._\\\\]+", RegexOptions.IgnoreCase
             );
             return (str.Success) ? str.ToString() : s;

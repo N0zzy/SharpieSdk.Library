@@ -21,7 +21,10 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
         AssemblyName = Assembly.GetName().Name;
         if (IsIgnore())
         {
-            "".WriteLn("library ignoring: " + AssemblyName);
+            if (!Settings.isViewLibsIgnore)
+            {
+                "".WriteLn("library ignoring: " + AssemblyName);
+            }
             return;
         }
         foreach (var type in ExtractTypes())
@@ -30,7 +33,11 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
             TypeCreate();
             TypeClear();
         }
-        "".WriteLn($"loaded library: {AssemblyName}");
+
+        if (!Settings.isViewLibsLoaded)
+        {
+            "".WriteLn($"loaded library: {AssemblyName}");
+        }
         PhpieLibrary.Loaded.Add(AssemblyName);
     }
 
@@ -46,10 +53,13 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
         {
             types = Assembly.GetTypes();
         }
-        catch (Exception)
+        catch 
         {
             PhpieLibrary.Failed.Add(AssemblyName);
-            "".WriteLn($" --- error loading {AssemblyName} --- ");
+            if (!Settings.isViewLibsLoaded)
+            {
+                "".WriteLn($" --- error loading {AssemblyName} --- ");
+            }
         }
         return types;
     }

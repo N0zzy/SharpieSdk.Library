@@ -15,7 +15,7 @@ public class AssemblyType
     public Type CurrentType { get; set; }
     public Type BaseType { get; set; }
     public bool isFinal { get; set; } = false;
-    public List<string> Implements { get; set; }
+    public Array Implements { get; set; }
     
     public Dictionary<string, TypeVariables> Properties { get; set; } = new ();
     public Dictionary<string, TypeVariables> Fields { get; set; } = new ();

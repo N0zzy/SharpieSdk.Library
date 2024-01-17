@@ -45,8 +45,10 @@ public sealed class PhpScriptGenerator
         _settings.outputPath = File.ReadAllText(path).Trim().ToReversSlash();
 
         DirectoryNotFoundException();
-        
-        "".WriteLn("output path: " + _settings.outputPath);
+        if (!_settings.isViewOutputPath)
+        {
+            "".WriteLn("output path: " + _settings.outputPath);
+        }
     }
     
     private void SetListIgrone()

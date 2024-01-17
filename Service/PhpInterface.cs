@@ -17,7 +17,7 @@ public class PhpInterface: PhpBaseModel
     {
         foreach (var method in _type.Methods)
         {
-            var methodName = method.Key;
+            string methodName = method.Key;
             if(methodName.IsPhpNameError()) continue;
             if (methodName.IsPhpNameFoundDot())
             {
@@ -32,8 +32,7 @@ public class PhpInterface: PhpBaseModel
 
     protected override void PhpBaseMethod(KeyValuePair<string, List<TypeMethod>> method)
     {
-        var countMethods = method.Value.Count;
-        if (countMethods == 1)
+        if (method.Value.Count == 1)
         {
             PhpBodyMethod(method, method.Key);
         }
@@ -42,9 +41,9 @@ public class PhpInterface: PhpBaseModel
     protected override void PhpBodyMethod(KeyValuePair<string, List<TypeMethod>> method, string methodKey)
     {
         _commentsMethods = new();   
-        var m0 = method.Value[0];
-        var _args = GetArgsMethod(m0.Args);
-        var _end = m0.IsAbstract ? ";" : "{}";
+        TypeMethod m0 = method.Value[0];
+        string _args = GetArgsMethod(m0.Args);
+        string _end = m0.IsAbstract ? ";" : "{}";
         _methods.Add("\t/**");
         if(_commentsMethods.Count > 0) 
             _methods.Add(string.Join("\n", _commentsMethods));

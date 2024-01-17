@@ -22,6 +22,10 @@ public class Settings
     /// Default: true - make, false - don't make
     /// </summary>
     public bool isMakeSdkList { get; set; } = false;
+    public bool isViewLibsIgnore { get; set; } = false;
+    public bool isViewOutputPath { get; set; } = false;
+    public bool isViewLibsLoaded { get; set; } = false;
     
     public string logLibsLoadedPath { get; set; } = null;
+    
 }

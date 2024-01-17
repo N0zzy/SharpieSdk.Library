@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -9,30 +8,32 @@ public abstract class MembersFactory: ManagerFactory
 {
     protected void AddFields()
     {
-        var i = 0;
+        int i = 0;
+        TypeVariables tv = new TypeVariables();
         foreach (var field in Type.GetFields(BindingFlags))
         {
             if(
                 Cache.Fields.ContainsKey(field.Name) || 
                 IsEnumValue__(field.Name)
             ) continue;
-            Cache.Fields.Add(field.Name, new TypeVariables()
-            {
-                Element = "field",
-                CurrentType = Type,
-                Type = field.FieldType,
-                Modifier = field.IsPublic ? "public" : (field.IsPrivate ? "private" : "protected"),
-                _isReadonly = field.IsInitOnly,
-                _isStatic = field.IsStatic,
-                Number = i
-            });
+            
+            tv.Element = "field";
+            tv.CurrentType = Type;
+            tv.Type = field.FieldType;
+            tv.Modifier = field.IsPublic ? "public" : (field.IsPrivate ? "private" : "protected");
+            tv._isReadonly = field.IsInitOnly;
+            tv._isStatic = field.IsStatic;
+            tv.Number = i;
+            
+            Cache.Fields.Add(field.Name, tv);
             i++;
         }
     }
 
     protected void AddProperties()
     {
-        var i = 0;
+        int i = 0;
+        TypeVariables tv = new TypeVariables();
         foreach (var property in Type.GetProperties(BindingFlags))
         {
             if(
@@ -49,66 +50,65 @@ public abstract class MembersFactory: ManagerFactory
             else 
                 modifier = "private";
             
-            Cache.Properties.Add( property.Name,new TypeVariables() {
-                Element = "property",
-                CurrentType = Type,
-                Type = property.PropertyType,
-                Modifier = modifier,
-                _isReadonly = property.CanRead && !property.CanWrite,
-                Number = i
-            });
+            tv.Element = "property";
+            tv.CurrentType = Type;
+            tv.Type = property.PropertyType;
+            tv.Modifier = modifier;
+            tv._isReadonly = property.CanRead && !property.CanWrite;
+            tv._isStatic = property.GetMethod != null && property.GetMethod.IsStatic;
+            tv.Number = i;
+            
+            Cache.Properties.Add( property.Name, tv);
             i++;
         }
     }
     
-    
     protected void AddConstructs()
     {
+        TypeMethod tm = new TypeMethod();
         foreach (var constructor in Type.GetConstructors())
         {
-            var methodName = "__construct";
+            string methodName = "__construct";
 
             if (!Cache.Methods.ContainsKey(methodName))
             {
                 Cache.Methods.Add(methodName, new List<TypeMethod>());
             }
             
-            Cache.Methods[methodName].Add(new TypeMethod() {
-                Name = methodName,
-                OriginalName = methodName,
-                Modifier = constructor.IsPublic ? "public" : (constructor.IsPrivate ? "private" : "protected"),
-                IsAbstract = false,
-                IsStatic = false,
-                ReturnType = null,
-                Args = GetArgs(constructor)
-            });
+            tm.Name = methodName;
+            tm.OriginalName = methodName;
+            tm.Modifier = constructor.IsPublic ? "public" : (constructor.IsPrivate ? "private" : "protected");
+            tm.IsAbstract = false;
+            tm.IsStatic = false;
+            tm.ReturnType = null;
+            tm.Args = GetArgs(constructor);
+            
+            Cache.Methods[methodName].Add(tm);
         }
     }
     
-
-
     protected void AddMethods()
     {
+        TypeMethod tm = new TypeMethod();
         foreach (var method in Type.GetMethods(BindingFlags))
         {
-            var methodName = method.Name.IsPhpNameFoundDot() 
+            string methodName = method.Name.IsPhpNameFoundDot() 
                 ? method.Name.GetPhpImplName() : method.Name;
             
             if (!Cache.Methods.ContainsKey(methodName))
             {
                 Cache.Methods.Add(methodName, new List<TypeMethod>());
             }
+
+            tm.Name = methodName;
+            tm.OriginalName = method.Name;
+            tm.ReturnType = method.ReturnType.Namespace + "." + method.ReturnType.Name;
+            tm.Modifier = method.IsPublic ? "public" : (method.IsPrivate ? "private" : "protected");
+            tm.IsAbstract = method.IsAbstract;
+            tm.IsStatic = method.IsStatic;
+            tm.Args = GetArgs(method);
             
-            Cache.Methods[methodName].Add(new TypeMethod()
-            {
-                Name = methodName,
-                OriginalName = method.Name,
-                ReturnType =  method.ReturnType.Namespace + "." + method.ReturnType.Name,
-                Modifier = method.IsPublic ? "public" : (method.IsPrivate ? "private" : "protected"),
-                IsAbstract = method.IsAbstract,
-                IsStatic = method.IsStatic,
-                Args = GetArgs(method)
-            });
+            Cache.Methods[methodName].Add(tm);
         }
     }
     
@@ -124,12 +124,11 @@ public abstract class MembersFactory: ManagerFactory
 
     private PhpArgs GetParameters(ParameterInfo parameter)
     {
-        var phpArgs = new PhpArgs
+        return new PhpArgs
         {
             Name = parameter.Name,
             Type = parameter.ParameterType.Namespace + "." + parameter.ParameterType.Name,
             Value = parameter.DefaultValue ?? parameter.RawDefaultValue
         };
-        return phpArgs;
     }
 }
