@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace PhpieSdk.Library.Service;
 
@@ -46,14 +48,19 @@ public class AssemblyTypesIterator: AssemblyTypesIteratorFactory
         return Settings.ListIgnore.Contains(AssemblyName);
     }
     
+
     private Type[] ExtractTypes()
     {
-        Type[] types = new Type[]{};
+        Type[] types;
         try
         {
             types = Assembly.GetTypes();
         }
-        catch 
+        catch
+        {
+            types = new Type[]{};
+        }
+        if (types.Length <= 0)
         {
             PhpieLibrary.Failed.Add(AssemblyName);
             if (!Settings.isViewLibsLoaded)
