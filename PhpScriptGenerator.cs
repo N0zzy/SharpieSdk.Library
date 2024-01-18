@@ -15,12 +15,16 @@ public sealed class PhpScriptGenerator
         SetOutputPath();
         SetListIgrone();
     }
-    
+
     public void Execute()
     {
+        PhpieLibrary.ReadAndDeleteFilesLoaded(_settings);
+        
         new AssemblyLoader().Run(_settings);
         new AssemblyIterator(_settings).Run();
-        MakeLibrariesLoadedLog();
+        
+        PhpieLibrary.MakeFilesLoaded(_settings);
+        PhpieLibrary.MakeLibrariesLoadedLog(_settings);
     }
 
     private void SetRootPath()
@@ -81,17 +85,6 @@ public sealed class PhpScriptGenerator
         if (!Directory.Exists(_settings.outputPath))
         {
             throw new DirectoryNotFoundException(_settings.outputPath);
-        }
-    }
-
-    private void MakeLibrariesLoadedLog()
-    {
-        if (_settings.isMakeSdkList)
-        {
-            var path = string.IsNullOrEmpty(_settings.logLibsLoadedPath)
-                ? _settings.rootPath + "/.sdklibs"
-                : _settings.logLibsLoadedPath;
-            PhpieLibrary.MakeLog(path);
         }
     }
 }

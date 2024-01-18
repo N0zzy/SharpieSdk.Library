@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -34,13 +35,6 @@ namespace PhpieSdk.Library.Service
             ).ToString();
         }
 
-        public static string ToMd5(this string s, string ns = "")
-        {
-            return MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(
-                s + ns
-            )).ToString();
-        }
-
         public static Boolean IsPhpValue(this PhpValue phpValue)
         {
             return phpValue.ToString().Equals("Pchp.Core.PhpValue");
@@ -69,6 +63,10 @@ namespace PhpieSdk.Library.Service
         {
             Console.Error.WriteLine($"[Warning] {V(v)}" + s);
         }
+        
+        public static void BenchmarkWriteLn(this string s, string v = "") {
+            Console.WriteLine($"[Benchmark] {V(v)}" + s);
+        }
 
         private static string V(string v)
         {
@@ -94,8 +92,23 @@ namespace PhpieSdk.Library.Service
         {
             return s.Split('.').Last();
         }
+
+        public static string GetMD5(this string s)
+        {
+            MD5 md5 = MD5.Create();
+            return BitConvert(md5.ComputeHash(Encoding.UTF8.GetBytes(s)));
+        }
         
-        
+        public static string GetMD5(this FileStream f)
+        {
+            MD5 md5 = MD5.Create();
+            return BitConvert(md5.ComputeHash(f));
+        }
+
+        private static string BitConvert(byte[] hashBytes)
+        {
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+        }
     }
 }
 

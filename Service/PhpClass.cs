@@ -52,21 +52,13 @@ public sealed class PhpClass: PhpBaseModel
 
     protected override void ScriptBuilder(StreamWriter phpFile)
     {
-        if (_methodsTraitOverride.Count > 0)
-        {
-            Script.Add("/**");
-            Script.Add(" * " + WarningDeprecated);
-            Script.Add(" */");
-            Script.Add($"trait {_type.Name}MethodsOverride");
-            Script.Add(SymbolOBrace);
-            Script.Add(string.Join("\n", _methodsTraitOverride));
-            Script.Add(SymbolСBrace);
-        }
-        foreach (var _ in _model) { Script.Add(_); }
-        Script.Add(SymbolOBrace);
-        foreach (var _ in _properties) { Script.Add(_); }
-        foreach (var _ in _methods) { Script.Add(_); }
-        Script.Add(SymbolСBrace);
-        phpFile.WriteLine(string.Join("\n", Script));
+        PhpClassScriptCompile();
+        phpFile.WriteLine(GetScriptToString());
+    }
+    
+    protected override string ScriptBuilder()
+    {
+        PhpClassScriptCompile();
+        return GetScriptToString();
     }
 }

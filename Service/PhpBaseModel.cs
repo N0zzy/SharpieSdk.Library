@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using PhpieSdk.Library.Service;
 
@@ -27,6 +29,7 @@ public abstract class PhpBaseModel: PhpBaseParameters
     protected abstract void Properties();
 
     protected abstract void ScriptBuilder(StreamWriter phpFile);
+    protected abstract string ScriptBuilder();
     
     protected PhpBaseModel(Settings settings, AssemblyType type)
     {
@@ -42,17 +45,32 @@ public abstract class PhpBaseModel: PhpBaseParameters
     private void Execute()
     {
         string filename = $"{_settings.outputScriptPath}/{_type.Name}.php";
+        string content = String.Empty;
+        content += Descriptor + "\n";
+        content += AddNamespace();
+        content += ScriptBuilder();
+        
+        var key =  filename.GetMD5();
+        var value = content.GetMD5();
+        if (PhpieLibrary.Files.TryGetValue(key, out var file))
+        {
+            if (file == value)
+            {
+                return;
+            }
+        }
+        PhpieLibrary.Files[key] = value;
+        
         using StreamWriter phpFile = new StreamWriter(filename);
-        phpFile.WriteLine(Descriptor);
-        AddNamespace(phpFile);
-        ScriptBuilder(phpFile);
+        phpFile.Write(content);
+        content = String.Empty;
         phpFile.Close();
     }
 
-    private void AddNamespace(StreamWriter phpFile)
+    private string AddNamespace()
     {
-        if(string.IsNullOrEmpty( _type.Namespace )) return;
-        phpFile.WriteLine($"namespace {_type.Namespace.ToReplaceDot("\\")};");
+        if(string.IsNullOrEmpty( _type.Namespace )) return "";
+        return $"namespace {_type.Namespace.ToReplaceDot("\\")};\n";
     }
 
     private void AddCommentsModel()
@@ -266,5 +284,45 @@ public abstract class PhpBaseModel: PhpBaseParameters
         
         _properties.Add("\t */");
         _properties.Add($"\t{prop.Value.Modifier} {@readonly}{@static}${prop.Key};");
+    }
+
+    protected string GetScriptToString()
+    {
+        return string.Join("\n", Script);
+    }
+
+    protected void PhpClassScriptCompile()
+    {
+        if (_methodsTraitOverride.Count > 0)
+        {
+            Script.Add("/**");
+            Script.Add(" * " + WarningDeprecated);
+            Script.Add(" */");
+            Script.Add($"trait {_type.Name}MethodsOverride");
+            Script.Add(SymbolOBrace);
+            Script.Add(string.Join("\n", _methodsTraitOverride));
+            Script.Add(SymbolСBrace);
+        }
+        foreach (var _ in _model) { Script.Add(_); }
+        Script.Add(SymbolOBrace);
+        foreach (var _ in _properties) { Script.Add(_); }
+        foreach (var _ in _methods) { Script.Add(_); }
+        Script.Add(SymbolСBrace);
+    }
+    
+    protected void PhpEnumScriptCompile()
+    {
+        foreach (var _ in _model) { Script.Add(_); }
+        Script.Add(SymbolOBrace);
+        foreach (var _ in _properties) { Script.Add(_); }
+        Script.Add(SymbolСBrace);
+    }
+    
+    protected void PhpInterfaceScriptCompile()
+    {
+        Script.Add(string.Join("\n", _model));
+        Script.Add(SymbolOBrace);
+        Script.Add(string.Join("\n", _methods));
+        Script.Add(SymbolСBrace);
     }
 }

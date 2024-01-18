@@ -58,10 +58,13 @@ public class PhpInterface: PhpBaseModel
 
     protected override void ScriptBuilder(StreamWriter phpFile)
     {
-        Script.Add(string.Join("\n", _model));
-        Script.Add(SymbolOBrace);
-        Script.Add(string.Join("\n", _methods));
-        Script.Add(SymbolСBrace);
-        phpFile.WriteLine(string.Join("\n", Script));
+        PhpInterfaceScriptCompile();
+        phpFile.WriteLine(GetScriptToString());
+    }
+    
+    protected override string ScriptBuilder()
+    {
+        PhpInterfaceScriptCompile();
+        return GetScriptToString();
     }
 }

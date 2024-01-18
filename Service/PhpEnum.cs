@@ -52,10 +52,13 @@ public class PhpEnum: PhpBaseModel
 
     protected override void ScriptBuilder(StreamWriter phpFile)
     {
-        foreach (var _ in _model) { Script.Add(_); }
-        Script.Add(SymbolOBrace);
-        foreach (var _ in _properties) { Script.Add(_); }
-        Script.Add(SymbolСBrace);
-        phpFile.WriteLine(string.Join("\n", Script));
+        PhpEnumScriptCompile();
+        phpFile.WriteLine(GetScriptToString());
+    }
+    
+    protected override string ScriptBuilder()
+    {
+        PhpEnumScriptCompile();
+        return GetScriptToString();
     }
 }
