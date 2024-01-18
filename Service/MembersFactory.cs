@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace PhpieSdk.Library.Service;
 
@@ -114,21 +116,38 @@ public abstract class MembersFactory: ManagerFactory
     
     private List<PhpArgs> GetArgs(ConstructorInfo method)
     {
-        return method.GetParameters().Select(GetParameters).ToList();
+        return GetParameters(method.GetParameters());
     }
     
     private List<PhpArgs> GetArgs(MethodInfo method)
     {
-        return method.GetParameters().Select(GetParameters).ToList();
+        return GetParameters(method.GetParameters());
     }
 
-    private PhpArgs GetParameters(ParameterInfo parameter)
+    private List<PhpArgs> GetParameters(ParameterInfo[] parameterInfos)
     {
-        return new PhpArgs
+        List<PhpArgs> list = new List<PhpArgs>();
+        if (parameterInfos.Length == 0)
         {
-            Name = parameter.Name,
-            Type = parameter.ParameterType.Namespace + "." + parameter.ParameterType.Name,
-            Value = parameter.DefaultValue ?? parameter.RawDefaultValue
-        };
+            return list;
+        }
+        
+        PhpArgs pArgs = new PhpArgs();
+        foreach (var vInfo in parameterInfos)
+        {
+            pArgs.Name = vInfo.Name;
+            pArgs.Value = vInfo.DefaultValue ?? vInfo.RawDefaultValue;
+            if (vInfo.ParameterType.GetProperty("Namespace") != null)
+            {
+                pArgs.Type = vInfo.ParameterType.Namespace + "." + vInfo.ParameterType.Name;
+            }
+            else
+            {
+                pArgs.Type = vInfo.ParameterType.Name;
+            }
+            list.Add(pArgs);
+
+        }
+        return list;
     }
 }

@@ -1,8 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
         <Configurations>Debug</Configurations>
-        <Platforms>AnyCPU</Platforms>
         <Version>0.6.3</Version>
         <Title>PhpieSdk.Library</Title>
         <Description>PhpieSdk.Library</Description>
@@ -10,15 +8,12 @@
         <RepositoryUrl>https://github.com/N0zzy/PhpieSdk.Library</RepositoryUrl>
         <RepositoryType>library</RepositoryType>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
-<!--        <PublishAot>true</PublishAot>-->
-<!--        <IsAotCompatible>true</IsAotCompatible>-->
-<!--        <StripSymbols>false</StripSymbols>-->
-<!--        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>-->
-<!--        <InvariantGlobalization>true</InvariantGlobalization>-->
+        <TargetFramework>net7.0</TargetFramework>
+        <Platforms>x64;x86;arm64</Platforms>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="Peachpie.Library" Version="1.2.0-r16166" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Peachpie.Library" Version="1.2.0-r16166" />
     </ItemGroup>
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
