@@ -87,9 +87,9 @@ public abstract class PhpBaseModel: PhpBaseParameters
         _model.Add(" */");
     }
     
-    private Array GetInterfaces(Array impls)
+    private string[] GetInterfaces(Array impls)
     {
-        Array interfaces = new string[impls.Length];
+        string[] interfaces = new string[impls.Length];
         int i = 0;
         foreach (var impl in impls)
         {
@@ -112,8 +112,12 @@ public abstract class PhpBaseModel: PhpBaseParameters
         MethodInfo derivedMethod;
         try
         {
-             baseMethod = _type.BaseType.GetMethod(method.Name, BindingFlags, null, new Type[] { typeof(int) }, null);
-             derivedMethod = _type.CurrentType.GetMethod(method.Name, BindingFlags, null, new Type[] { typeof(int) }, null);
+             baseMethod = _type.BaseType.GetMethod(
+                 method.Name, BindingFlags, null, new Type[] { typeof(int) }, null
+                 );
+             derivedMethod = _type.CurrentType.GetMethod(
+                 method.Name, BindingFlags, null, new Type[] { typeof(int) }, null
+                 );
         }
         catch
         {

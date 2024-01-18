@@ -146,7 +146,6 @@ public abstract class MembersFactory: ManagerFactory
                 pArgs.Type = vInfo.ParameterType.Name;
             }
             list.Add(pArgs);
-
         }
         return list;
     }
