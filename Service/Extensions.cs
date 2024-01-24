@@ -45,7 +45,8 @@ namespace PhpieSdk.Library.Service
             return phpValue.ToString().Equals("Pchp.Core.PhpNumber");
         }
         
-        public static void WriteLn(this string s, string v = "") {
+        public static void WriteLn(this string s, string v = "") 
+        {
             Console.WriteLine($"[SDK] {V(v)}" + s);
         }
         
@@ -64,7 +65,8 @@ namespace PhpieSdk.Library.Service
             Console.Error.WriteLine($"[Warning] {V(v)}" + s);
         }
         
-        public static void BenchmarkWriteLn(this string s, string v = "") {
+        public static void BenchmarkWriteLn(this string s, string v = "") 
+        {
             Console.WriteLine($"[Benchmark] {V(v)}" + s);
         }
 

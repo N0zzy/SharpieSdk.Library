@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace PhpieSdk.Library.Service;
 
@@ -12,4 +13,6 @@ public class TypeVariables
     
     public bool _isStatic { get; set; } = false;
     public bool _isReadonly { get; set; } = false;
+    public bool _isConst { get; set; } = false;
+    public string Value { get; set; } = null;
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using PhpieSdk.Library.Service;
 
 namespace PhpieSdk.Library;
@@ -8,12 +9,13 @@ public class PhpEnum: PhpBaseModel
 {
     public PhpEnum(Settings settings, AssemblyType type) : base(settings, type) {}
 
-    protected override void Model()
+    protected override Task Model()
     {
         _model.Add($"enum {_type.Name}{GetImpsInterfaces()}");
+        return Task.CompletedTask;
     }
 
-    protected override void Methods()
+    protected override Task Methods()
     {
         foreach (var method in _type.Methods)
         {
@@ -28,9 +30,10 @@ public class PhpEnum: PhpBaseModel
                 PhpBaseMethod(method);
             }
         }
+        return Task.CompletedTask;
     }
 
-    protected override void Properties()
+    protected override Task Properties()
     {
         foreach (var field in _type.Fields)
         {
@@ -48,6 +51,7 @@ public class PhpEnum: PhpBaseModel
                 _properties.Add($"\tcase {field.Key};");
             } 
         }
+        return Task.CompletedTask;
     }
 
     protected override void ScriptBuilder(StreamWriter phpFile)

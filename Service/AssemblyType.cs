@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PhpieSdk.Library.Service;
 
@@ -20,6 +21,5 @@ public class AssemblyType
     public Dictionary<string, TypeVariables> Properties { get; set; } = new ();
     public Dictionary<string, TypeVariables> Fields { get; set; } = new ();
     public Dictionary<string, List<TypeEvents>> Events { get; set; } = new ();
-    public Dictionary<string, List<TypeMethod>> Methods { get; set; } = new ();
-
+    public Dictionary<string, List<TypeMethod>> Methods { get; set; } = new();
 }

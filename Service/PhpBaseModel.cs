@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using PhpieSdk.Library.Service;
 
 namespace PhpieSdk.Library;
@@ -22,11 +20,11 @@ public abstract class PhpBaseModel: PhpBaseParameters
     private readonly BindingFlags BindingFlags
         = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic;
     
-    protected abstract void Model();
+    protected abstract Task Model();
     
-    protected abstract void Methods();
+    protected abstract Task Methods();
     
-    protected abstract void Properties();
+    protected abstract Task Properties();
 
     protected abstract void ScriptBuilder(StreamWriter phpFile);
     protected abstract string ScriptBuilder();
@@ -35,14 +33,15 @@ public abstract class PhpBaseModel: PhpBaseParameters
     {
         _settings = settings;
         _type = type;
-        AddCommentsModel();
-        Model();
+        
         Properties();
         Methods();
-        Execute();
+        
+        AddCommentsModel();
+        Model();
     }
     
-    private void Execute()
+    public void Execute()
     {
         string filename = $"{_settings.outputScriptPath}/{_type.Name}.php";
         string content = String.Empty;
@@ -63,7 +62,6 @@ public abstract class PhpBaseModel: PhpBaseParameters
         
         using StreamWriter phpFile = new StreamWriter(filename);
         phpFile.Write(content);
-        content = String.Empty;
         phpFile.Close();
     }
 
@@ -73,18 +71,17 @@ public abstract class PhpBaseModel: PhpBaseParameters
         return $"namespace {_type.Namespace.ToReplaceDot("\\")};\n";
     }
 
-    private void AddCommentsModel()
+    private Task AddCommentsModel()
     {
         _model.Add("/**");
         if(_type.OriginalName.IsPhpNameGeneric())
         {
             _model.Add($" * {WarningDeprecated}");
         }
-        foreach (var comment in _commentsModel)
-        {
-            _model.Add(comment);
-        }
+        
+        _model.Add(string.Join("\n", _commentsModel));
         _model.Add(" */");
+        return Task.CompletedTask;
     }
     
     private string[] GetInterfaces(Array impls)
@@ -93,10 +90,10 @@ public abstract class PhpBaseModel: PhpBaseParameters
         int i = 0;
         foreach (var impl in impls)
         {
-            interfaces.SetValue(impl, i);
+            interfaces.SetValue(impl.ToString()!.Replace('`', '_'), i);
             i++;
         }
-        return interfaces;
+        return interfaces.Distinct().ToArray();
     }
 
     protected string GetImpsInterfaces()
@@ -146,8 +143,8 @@ public abstract class PhpBaseModel: PhpBaseParameters
         List<string> args = new List<string>();
         foreach (var arg in mArgs)
         {
-            string t = PhpBaseTypes.Convert(arg.Type);
-            _commentsMethods.Add($"\t * @param \\{t.ToReplaceDot("\\").Replace("`", "_")} ${arg.Name}");
+            string t = PhpBaseTypes.Extract(arg.Type);
+            _commentsMethods.Add($"\t * @param \\{t} ${arg.Name}");
             args.Add($"${arg.Name}");
         }
         return string.Join(", ", args);
@@ -173,7 +170,8 @@ public abstract class PhpBaseModel: PhpBaseParameters
         {
             if(m.Name.IsPhpNameError()) continue;
             staticMethod = m.IsStatic ? "static" : "";
-            _commentsMethods = new List<string>();
+            _commentsMethods.Clear();
+            
             string _args = GetArgsMethod(m.Args);
             if (countMethods == 1)
             {
@@ -194,10 +192,10 @@ public abstract class PhpBaseModel: PhpBaseParameters
                     _methodsTraitOverride
                         .Add($"\t * @var {PhpBaseTypes.Extract(_arg.Type, true)} ${_arg.Name}");
                 }
-
+            
                 if(m.Name != "__construct")
                 {
-                    string t = PhpBaseTypes.Convert(m.ReturnType);
+                    string t = PhpBaseTypes.Extract(m.ReturnType);
                     _methodsTraitOverride.Add("\t * @return " +  PhpBaseTypes.Extract(t, true));
                 }
                 _methodsTraitOverride.Add("\t */");
@@ -231,7 +229,7 @@ public abstract class PhpBaseModel: PhpBaseParameters
         if (method.Name != "__construct")
         {
             _methods.Add("\t * @return " +  PhpBaseTypes.Extract(
-                PhpBaseTypes.Convert(method.ReturnType), true
+                PhpBaseTypes.Extract(method.ReturnType), true
             ));
         }
 
@@ -260,9 +258,9 @@ public abstract class PhpBaseModel: PhpBaseParameters
         _properties.Add("\t/**");
         
         string @readonly = String.Empty;
-        string  @static  = prop.Value._isStatic ? "static " : "";
-        string  typeComment = PhpBaseTypes.Extract(prop.Value.Type.ToString(), true);
-        string  genericComment = String.Empty;
+        string @static = prop.Value._isStatic ? "static " : "";
+        string typeComment = PhpBaseTypes.Extract(prop.Value.Type.ToString(), true);
+        string genericComment = String.Empty;
         
         if (prop.Value.Type.IsGenericType)
         {
@@ -307,18 +305,19 @@ public abstract class PhpBaseModel: PhpBaseParameters
             Script.Add(string.Join("\n", _methodsTraitOverride));
             Script.Add(SymbolСBrace);
         }
-        foreach (var _ in _model) { Script.Add(_); }
+        
+        Script.Add(string.Join("\n", _model));
         Script.Add(SymbolOBrace);
-        foreach (var _ in _properties) { Script.Add(_); }
-        foreach (var _ in _methods) { Script.Add(_); }
+        Script.Add(string.Join("\n", _properties));
+        Script.Add(string.Join("\n", _methods));
         Script.Add(SymbolСBrace);
     }
     
     protected void PhpEnumScriptCompile()
     {
-        foreach (var _ in _model) { Script.Add(_); }
+        Script.Add(string.Join("\n", _model));
         Script.Add(SymbolOBrace);
-        foreach (var _ in _properties) { Script.Add(_); }
+        Script.Add(string.Join("\n", _properties));
         Script.Add(SymbolСBrace);
     }
     
@@ -326,6 +325,7 @@ public abstract class PhpBaseModel: PhpBaseParameters
     {
         Script.Add(string.Join("\n", _model));
         Script.Add(SymbolOBrace);
+        Script.Add(string.Join("\n", _properties));
         Script.Add(string.Join("\n", _methods));
         Script.Add(SymbolСBrace);
     }

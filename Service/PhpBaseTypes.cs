@@ -24,7 +24,7 @@ public struct PhpBaseTypes
         ["system.boolean[]"] = "array",
     };
 
-    public static string Convert(string type)
+    private static string Convert(string type)
     {
         string _type = type.ToLower();
         return Types.ContainsKey(_type) ? $"{type}|{Types[_type]}" : type;
