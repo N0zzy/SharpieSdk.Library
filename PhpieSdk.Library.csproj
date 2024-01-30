@@ -1,15 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Configurations>Debug</Configurations>
-        <Version>0.7.0</Version>
+        <Version>1.0.0</Version>
         <Title>PhpieSdk.Library</Title>
         <Description>PhpieSdk.Library</Description>
         <PackageProjectUrl>https://github.com/N0zzy/PhpieSdk.Library</PackageProjectUrl>
         <RepositoryUrl>https://github.com/N0zzy/PhpieSdk.Library</RepositoryUrl>
         <RepositoryType>library</RepositoryType>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
         <Platforms>x64;x86;arm64</Platforms>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+      <Optimize>true</Optimize>
+      <DebugType>none</DebugType>
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -17,5 +21,46 @@
     </ItemGroup>
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Remove="__Service\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="__Service\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Remove="__Service\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include=".git\config" />
+      <Content Include=".git\description" />
+      <Content Include=".git\HEAD" />
+      <Content Include=".git\hooks\applypatch-msg.sample" />
+      <Content Include=".git\hooks\commit-msg.sample" />
+      <Content Include=".git\hooks\fsmonitor-watchman.sample" />
+      <Content Include=".git\hooks\post-update.sample" />
+      <Content Include=".git\hooks\pre-applypatch.sample" />
+      <Content Include=".git\hooks\pre-commit.sample" />
+      <Content Include=".git\hooks\pre-merge-commit.sample" />
+      <Content Include=".git\hooks\pre-push.sample" />
+      <Content Include=".git\hooks\pre-rebase.sample" />
+      <Content Include=".git\hooks\pre-receive.sample" />
+      <Content Include=".git\hooks\prepare-commit-msg.sample" />
+      <Content Include=".git\hooks\push-to-checkout.sample" />
+      <Content Include=".git\hooks\sendemail-validate.sample" />
+      <Content Include=".git\hooks\update.sample" />
+      <Content Include=".git\index" />
+      <Content Include=".git\info\exclude" />
+      <Content Include=".git\logs\HEAD" />
+      <Content Include=".git\logs\refs\heads\release-1" />
+      <Content Include=".git\logs\refs\remotes\origin\HEAD" />
+      <Content Include=".git\objects\pack\pack-8af4f9d4c702b66081af8a5ecddbdb0489a1d3fc.idx" />
+      <Content Include=".git\objects\pack\pack-8af4f9d4c702b66081af8a5ecddbdb0489a1d3fc.pack" />
+      <Content Include=".git\objects\pack\pack-8af4f9d4c702b66081af8a5ecddbdb0489a1d3fc.rev" />
+      <Content Include=".git\packed-refs" />
+      <Content Include=".git\refs\heads\release-1" />
+      <Content Include=".git\refs\remotes\origin\HEAD" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include=".git\objects\info\" />
+      <Folder Include=".git\refs\tags\" />
     </ItemGroup>
 </Project>

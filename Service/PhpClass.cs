@@ -1,69 +1,100 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using PhpieSdk.Library.Service;
+﻿using System.Linq;
 
-namespace PhpieSdk.Library;
+namespace PhpieSdk.Library.Service;
 
-public sealed class PhpClass: PhpBaseModel
+public class PhpClass: PhpFactory
 {
-    public PhpClass(Settings settings, AssemblyType type) : base(settings, type)
+    private bool isStruct = false;
+    
+    protected override void Comments()
     {
+
     }
 
-    protected override Task Model()
+    protected override void Models()
     {
-        string extends = string.IsNullOrEmpty(_type.Extends) 
-            ? "" 
-            : " extends " + _type.Extends.Replace("`", "_");
-        string implements = GetImpsInterfaces();
-        string final = _type.isFinal 
-            ? "final " 
-            : "";
-        _model.Add($"{final}class {_type.Name}{extends}{implements}");
-        return Task.CompletedTask;
+        string impls = GetImpsInterfaces();
+        Header = GetModifierFinal() + GetModifierAbstract() + PhpSdkStorage.Type.Model.Name + " " + PhpSdkStorage.Type.Name;
+        Header += $"{GetExtends()}{impls}";
     }
 
-    protected override Task Methods()
+    protected override void Properties()
     {
-        foreach (var method in _type.Methods)
+        var groupedFields = 
+            PhpSdkStorage.Type.Instance.GetFields(Flags).GroupBy(f => f.Name);
+        foreach (var group in groupedFields)
         {
-            string methodName = method.Key;
-
-            if(methodName.IsPhpNameError()) continue;
-            if (methodName.IsPhpNameFoundDot())
+            var fields = group.ToArray();
+            if (fields.Length > 1)
             {
-                PhpImplMethod(method);
+                FieldsCompileGroup(fields);
             }
             else
             {
-                PhpBaseMethod(method);
+                FieldsCompile(fields);
             }
         }
-        return Task.CompletedTask;
+
+        var groupedProps = 
+            PhpSdkStorage.Type.Instance.GetProperties(Flags).GroupBy(f => f.Name);
+        foreach (var group in groupedProps)
+        {
+            var properties = group.ToArray();
+            if (properties.Length > 1)
+            {
+                PropertiesCompileGroup(properties);
+            }
+            else
+            {
+                PropertiesCompile(properties);
+            }
+        }
     }
 
-    protected override Task Properties()
+    protected override void Methods()
     {
-        foreach (var v in _type.Fields)
+        var groupedMethods = 
+            PhpSdkStorage.Type.Instance.GetMethods(Flags).GroupBy(f => f.Name.Split(".").Last());
+        foreach (var group in groupedMethods)
         {
-            PhpBaseProperties(v);
+            var methods = group.ToArray();
+            if (methods.Length > 1)
+            {
+                SetNameOverride();
+                MethodsCompileGroup(group.Key, methods);
+            }
+            else {
+                MethodsCompile(methods);
+            }
         }
-        foreach (var v in _type.Properties)
-        {
-            PhpBaseProperties(v);
-        }
-        return Task.CompletedTask;
+
+        CtorCompile(PhpSdkStorage.Type.Instance.GetConstructors());
     }
 
-    protected override void ScriptBuilder(StreamWriter phpFile)
+    public PhpClass SetStruct(bool value)
     {
-        PhpClassScriptCompile();
-        phpFile.WriteLine(GetScriptToString());
+        isStruct = value;
+        return this;
+    }
+
+    private string GetExtends()
+    {
+        string extends = string.IsNullOrEmpty(PhpSdkStorage.Type.Model.Extends) 
+            ? "" 
+            : " extends " + PhpSdkStorage.Type.Model.Extends.Replace("`", "_");
+        return extends;
     }
     
-    protected override string ScriptBuilder()
+    private string GetModifierFinal()
     {
-        PhpClassScriptCompile();
-        return GetScriptToString();
+        return isStruct || PhpSdkStorage.Type.Instance.IsSealed ? "final " : "";
+    }
+    
+    private string GetModifierAbstract()
+    {
+        return 
+            PhpSdkStorage.Type.Instance.IsAbstract && 
+            PhpSdkStorage.Type.Model.Name == "class" 
+            ? "abstract " : "";
     }
 }

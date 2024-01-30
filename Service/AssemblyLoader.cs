@@ -1,52 +1,88 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
 namespace PhpieSdk.Library.Service;
 
-struct AssemblyLoader
+public class AssemblyLoader
 {
+    public string CurrentPath { get; set; }
+    public bool IsViewMessageAboutLoaded { get; set; }
+    public HashSet<string> LibrariesListLoaded { get; set; }
+    
     private string GetLibraryExtension()
     {
         return IsWindows() ? "dll" : "so";
     }
 
-    private string GetLibraryPath(Settings settings)
-    {
-        string libsPath = String.Empty;
-        if (String.IsNullOrEmpty(settings.libsPath))
-        {
-            string b = !String.IsNullOrEmpty(settings.targetBuild)
-                ? $"/bin/{settings.targetBuild}"
-                : "";
-            string f = !String.IsNullOrEmpty(settings.targetFramework)
-                ? $"/{settings.targetFramework}"
-                : "";
-            libsPath = settings.rootPath + $"{b}{f}";
-        }
-        return Directory.Exists(libsPath) ? libsPath : settings.rootPath;
-    }
-    
     private bool IsWindows()
     {
         return Environment.OSVersion.ToString().Contains("Windows");
     }
     
-    public void Run(Settings settings)
+    private HashSet<string> GetDlLs(string libPath)
     {
-        string libName = GetLibraryExtension();
-        string libPath = GetLibraryPath(settings);
+        var dlls = new HashSet<string>();
+        var assems = AppDomain.CurrentDomain.GetAssemblies();
+        
+        foreach (var assem in assems)
+        {
+            foreach (var module in assem.GetModules())
+            {
+                dlls.Add(libPath + module);
+            }
+        }
+        return dlls;
+    }
 
-        if (!settings.isViewLibsLoaded)
+    public void Run(string libsPath = null)
+    {
+        
+        string libName = GetLibraryExtension();
+        string libPath = libsPath ?? CurrentPath;
+
+        if (IsViewMessageAboutLoaded)
         {
             "".WriteLn("loading libraries from " + libPath);
         }
         
+        HashSet<string> dlls = GetDlLs(libPath);
+        LibrariesListLoaded = new HashSet<string>();
+        
         foreach (var f in Directory.GetFiles(libPath, $"*.{libName}"))
         {
-            if (File.Exists(f.ToReversSlash()))
+            var frs = f.ToReversSlash();
+            if (File.Exists(frs) && !dlls.Contains(frs))
             {
-                Assembly.LoadFile(f.ToReversSlash());
+                Assembly.LoadFrom(frs);
+                LibrariesListLoaded.Add(frs);
+                
+                if (IsViewMessageAboutLoaded)
+                {
+                    frs.WriteLn("library loaded:");
+                }
+            }
+            dlls.Remove(frs);
+        }
+        
+        SaveHashSummary();
+    }
+
+    private void SaveHashSummary()
+    {
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            foreach (var fileStream in assembly.GetFiles())
+            {
+                var path = fileStream.Name.ToReversSlash();
+                var key = path.GetMD5();
+                if (!PhpSdkStorage.Files.ContainsKey(key))
+                {
+                    PhpSdkStorage.Files.Add(key, new List<string>());
+                    PhpSdkStorage.Files[key].Add(null);
+                }
+                PhpSdkStorage.Files[key].Add(File.ReadAllBytes(path).GetMD5());
             }
         }
     }
