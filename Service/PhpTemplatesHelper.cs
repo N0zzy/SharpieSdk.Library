@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -22,18 +21,19 @@ public abstract class PhpTemplatesHelper
     protected List<string> FieldTypes = new();
     protected List<string> PropTypes = new();
     protected List<string> CommentModel = new();
-    protected List<string> CommentMethod = new();
     protected List<string> MethodArgs = new();
     protected List<string> CommentMethodArgs = new();
     protected List<string> MethodOverrideArgs = new();
-    protected Dictionary<string, bool> methodParentCache = new ();
+    protected List<string> ParentReturns = new();
 
     protected readonly BindingFlags Flags = 
         BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic;
     
     protected readonly string WarningDeprecated = 
         "@deprecated this element should not be used by you because it will break your program";
-
+    protected readonly string WarningDisclaimer = 
+        "@internal Please ensure that this item can interact with your program before using it, as it may not be available and its use is your responsibility.";
+    
     protected readonly string Descriptor = "<?php";
     protected readonly string SymbolOBrace = "{";
     protected readonly string SymbolСBrace = "}";
@@ -43,9 +43,8 @@ public abstract class PhpTemplatesHelper
     protected string TraitName = String.Empty;
 
     protected readonly Type[] TypeInt = new Type[] { typeof(int) };
-
-
-    protected bool IsDebug = false;
+    
+    protected bool IsUppercase = false;
     
     protected void SetNamespace()
     {
@@ -56,11 +55,6 @@ public abstract class PhpTemplatesHelper
         }
     }
 
-    protected string GetScriptToString(ImmutableList<string> script)
-    {
-        return string.Join("\n", script);
-    }
-    
     protected string GetScriptToString(List<string> script)
     {
         return string.Join("\n", script);
@@ -109,7 +103,8 @@ public abstract class PhpTemplatesHelper
             }
             else
             {
-                @var = $"{GetPhpModifier(field.IsPublic, field.IsPrivate)}{@static}${field.Name};";
+                var name = field.Name;
+                @var = $"{GetPhpModifier(field.IsPublic, field.IsPrivate)}{@static}${name};";
             }
         }
         ContentProperties.Add("\t" + $"{@var}");
@@ -144,13 +139,12 @@ public abstract class PhpTemplatesHelper
     {
         return IsInherited(
             PhpSdkStorage.Type.Instance, 
-            methodInfo.Name.Split(".").Last(), 
-            methodInfo.Name,
+            methodInfo.Name.Split(".").Last(),
             GetPhpModifier(methodInfo.IsPublic, methodInfo.IsPrivate)
         );
     }
 
-    private bool IsInherited(Type type, string name, string fullName, string modifier)
+    private bool IsInherited(Type type, string name, string modifier)
     {
         var methods = type.BaseType?.GetMethods(Flags);
         if (methods == null)
@@ -160,12 +154,15 @@ public abstract class PhpTemplatesHelper
         
         foreach (var methodInfo in methods)
         {
-            if (name == methodInfo.Name && modifier == GetPhpModifier(methodInfo.IsPublic, methodInfo.IsPrivate))
+            if (
+                name == methodInfo.Name && 
+                modifier == GetPhpModifier(methodInfo.IsPublic, methodInfo.IsPrivate)
+            )
             {
                 return true;
             }
         }
-        return IsInherited(type.BaseType, name, fullName, modifier);
+        return IsInherited(type.BaseType, name, modifier);
     }
 
     protected bool IsPropertyMethod(MethodInfo methodInfo)
@@ -188,8 +185,10 @@ public abstract class PhpTemplatesHelper
         if (name.IsPhpLastNameError()) return;
         
         var @static = method.IsStatic ? "static " : "";
-        var @abstract = method.IsAbstract ? "abstract " : "";
+        var @abstract = method.IsAbstract && !PhpSdkStorage.Type.Instance.IsInterface 
+            ? "abstract " : "";
         var @back = method.IsAbstract ? ";" : "{}";
+        var @modifier = GetPhpModifier(method.IsPublic, method.IsPrivate);
         string @args;
    
         if (PhpSdkStorage.Type.Instance.IsInterface)
@@ -198,7 +197,10 @@ public abstract class PhpTemplatesHelper
             {
                 MethodArgsCompile(method.GetParameters(), false);
                 args = GetArgsToString();
-                CommentModel.Add($" * @method {PhpBaseTypes.Extract(method.ReturnType.ToString(), true)} {@name}({@args})");
+                @name = @name.ToString().ToUpperFirstSymbol(IsUppercase);
+                CommentModel.Add($" * @method {PhpBaseTypes.Extract(method.ReturnType.ToString(), true)} {@name}({@args}) [modifier: {@modifier.TrimEnd()}]");
+                MethodArgs.Clear();
+                CommentMethodArgs.Clear();
                 return;
             }
         }
@@ -216,6 +218,7 @@ public abstract class PhpTemplatesHelper
         }
         
         args = GetArgsToString();
+        @name = @name.ToString().ToUpperFirstSymbol(IsUppercase);
         ContentMethods.Add($"\t{@abstract}" + GetPhpModifier(
             method.IsPublic, method.IsPrivate
         ) + $"{@static}function {@name}({@args}){@back}");
@@ -224,7 +227,7 @@ public abstract class PhpTemplatesHelper
         CommentMethodArgs.Clear();
     }
     
-    protected void MethodArgsCompile(ParameterInfo[] parameterInfos, bool isParam = true, bool isOverride = false)
+    protected void MethodArgsCompile(ParameterInfo[] parameterInfos, bool isParam, bool isOverride = false)
     {
         foreach (var parameter in parameterInfos)
         {
@@ -267,6 +270,7 @@ public abstract class PhpTemplatesHelper
             }
             var comment = "\t * @param " + @type.Split("[")[0] +
                     $" {@out}$" + parameter.Name + @generic;
+           
             MethodArgs.Add($"{@out}$" + parameter.Name);
             CommentMethodArgs.Add(comment);
         }

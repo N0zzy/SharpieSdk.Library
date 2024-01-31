@@ -122,6 +122,11 @@ public static class PhpSdkExtension
     {
         return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
     }
+
+    public static string ToUpperFirstSymbol(this string str, bool isUpper = true)
+    {
+        return isUpper ? char.ToLowerInvariant(str[0]) + str.Substring(1) : str;
+    }
 }
 
 

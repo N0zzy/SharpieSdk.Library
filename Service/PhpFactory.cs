@@ -14,6 +14,13 @@ public abstract class PhpFactory: PhpTemplates
     protected abstract void Properties();
     protected abstract void Methods();
 
+    public PhpFactory SetUppercase(bool value)
+    {
+        IsUppercase = value;
+        return this;
+    }
+    
+    
     private void ScriptBuilderForAll()
     {
         SetNamespace();
@@ -22,17 +29,6 @@ public abstract class PhpFactory: PhpTemplates
         {
             ImmutableList<string> immutable = Script.ToImmutableList();
             Script.Clear();
-            // var key =  Path.GetMD5();
-            // var content = GetScriptToString(immutable.ToList());
-            // var value = content.GetMD5();
-            // if (PhpSdkStorage.Files.TryGetValue(key, out var file))
-            // {
-            //     if (file == value)
-            //     {
-            //         return;
-            //     }
-            // }
-            // PhpSdkStorage.Files[key] = value;
             File.WriteAllTextAsync(Path, GetScriptToString(immutable.ToList()));
         });
     }

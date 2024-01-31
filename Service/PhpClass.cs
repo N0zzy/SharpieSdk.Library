@@ -14,7 +14,9 @@ public class PhpClass: PhpFactory
     protected override void Models()
     {
         string impls = GetImpsInterfaces();
-        Header = GetModifierFinal() + GetModifierAbstract() + PhpSdkStorage.Type.Model.Name + " " + PhpSdkStorage.Type.Name;
+        var modifier = GetModifierAbstract();
+        modifier = string.IsNullOrEmpty(modifier) ? GetModifierFinal() : "";
+        Header = modifier + PhpSdkStorage.Type.Model.Name + " " + PhpSdkStorage.Type.Name;
         Header += $"{GetExtends()}{impls}";
     }
 
@@ -70,13 +72,7 @@ public class PhpClass: PhpFactory
 
         CtorCompile(PhpSdkStorage.Type.Instance.GetConstructors());
     }
-
-    public PhpClass SetStruct(bool value)
-    {
-        isStruct = value;
-        return this;
-    }
-
+    
     private string GetExtends()
     {
         string extends = string.IsNullOrEmpty(PhpSdkStorage.Type.Model.Extends) 

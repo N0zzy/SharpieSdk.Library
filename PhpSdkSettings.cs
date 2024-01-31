@@ -25,11 +25,16 @@ public class PhpSdkSettings
     /// <summary>
     /// Директория с выгрузкой php-скриптов
     /// </summary>
-    public string OutputPath { get; set; } = null;
-
-    public bool IsViewMessageAboutLoaded { get; set; } = true;
-    
+    public string OutputPath { get; init; } = null;
+    /// <summary>
+    /// Флаг установки регистра символов в имени методов
+    /// </summary>
+    public bool IsUppercaseNames { get; init; } = false;
+    /// <summary>
+    ///
+    /// </summary>
+    public bool IsViewMessageAboutLoaded { get; init; } = true;
     public HashSet<string> LibrariesListLoaded { get; set; }
-
-    public List<string> IgnoreList{ get; set; }
+    public List<string> IgnoreList{ get; init; }
+    public List<object> PreloadList { get; init; } = new ();
 }

@@ -3,6 +3,8 @@
 public class PhpWrapper
 {
     public string ModelName { private get; set; }
+    public bool IsUppercase { private get; set; } = false;
+    
     private PhpClass phpClass = new PhpClass();
     private PhpEnum phpEnum = new PhpEnum();
     private PhpInterface phpInterface = new PhpInterface();
@@ -14,17 +16,26 @@ public class PhpWrapper
 
     private void Route()
     {
+        PhpFactory phpFactory = null;
+        
         switch (ModelName)
         {
-            case "class": PhpClass(); break;
-            case "interface": PhpInterface(); break;
-            case "enum": PhpEnum(); break;
-            case "struct": PhpClass(true); break;
+            case "class": phpFactory = PhpClass(); break;
+            case "interface": phpFactory = PhpInterface(); break;
+            case "enum": phpFactory = PhpEnum(); break;
+            case "struct": phpFactory = PhpClass(); break;
             default: "".WarnLn(ModelName); break;
+        }
+
+        if (phpFactory != null)
+        {
+            phpFactory
+                .SetUppercase(IsUppercase)
+                .Execute();
         }
     }
 
-    private void PhpEnum() => phpEnum.Execute();
-    private void PhpInterface() => phpInterface.Execute();
-    private void PhpClass(bool isStruct = false) => phpClass.SetStruct(isStruct).Execute();
+    private PhpFactory PhpEnum() => phpEnum;
+    private PhpFactory PhpInterface() => phpInterface;
+    private PhpFactory PhpClass(bool isStruct = false) => phpClass;
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -6,6 +7,11 @@ namespace PhpieSdk.Library.Service;
 
 public abstract class PhpSdkProvider: PhpSdkProvider.ISettings
 {
+    protected List<object> LoaderList = new List<object>()
+    {
+        typeof(System.Uri),
+    };
+    
     public abstract PhpSdkSettings Settings { get; init; }
     
     private readonly PhpModel PhpModel = new();
@@ -125,6 +131,7 @@ public abstract class PhpSdkProvider: PhpSdkProvider.ISettings
     private void PhpWrapper()
     {
         PhpModel.Wrapper.ModelName = PhpSdkStorage.Type.Model.Name;
+        PhpModel.Wrapper.IsUppercase = Settings.IsUppercaseNames;
         PhpModel.Wrapper.Run();
     }
 }

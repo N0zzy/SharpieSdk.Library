@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Loader;
 
 namespace PhpieSdk.Library.Service;
 
@@ -21,7 +22,7 @@ public class AssemblyLoader
         return Environment.OSVersion.ToString().Contains("Windows");
     }
     
-    private HashSet<string> GetDlLs(string libPath)
+    private HashSet<string> GetDynamicLibs(string libPath)
     {
         var dlls = new HashSet<string>();
         var assems = AppDomain.CurrentDomain.GetAssemblies();
@@ -38,7 +39,6 @@ public class AssemblyLoader
 
     public void Run(string libsPath = null)
     {
-        
         string libName = GetLibraryExtension();
         string libPath = libsPath ?? CurrentPath;
 
@@ -47,13 +47,30 @@ public class AssemblyLoader
             "".WriteLn("loading libraries from " + libPath);
         }
         
-        HashSet<string> dlls = GetDlLs(libPath);
+        HashSet<string> libs = GetDynamicLibs(libPath);
+
         LibrariesListLoaded = new HashSet<string>();
+        
+        foreach (var f in libs)
+        {
+            var frs = f.ToReversSlash();
+            if (File.Exists(frs))
+            {
+                AssemblyLoadContext.Default.LoadFromAssemblyPath(frs);
+                LibrariesListLoaded.Add(frs);
+                
+                if (IsViewMessageAboutLoaded)
+                {
+                    frs.WriteLn("library loaded:");
+                }
+            }
+        }
+        
         
         foreach (var f in Directory.GetFiles(libPath, $"*.{libName}"))
         {
             var frs = f.ToReversSlash();
-            if (File.Exists(frs) && !dlls.Contains(frs))
+            if (File.Exists(frs))
             {
                 Assembly.LoadFrom(frs);
                 LibrariesListLoaded.Add(frs);
@@ -63,8 +80,9 @@ public class AssemblyLoader
                     frs.WriteLn("library loaded:");
                 }
             }
-            dlls.Remove(frs);
         }
+        
+        Assembly.Load("System.Private.CoreLib");
         
         SaveHashSummary();
     }

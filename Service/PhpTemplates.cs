@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace PhpieSdk.Library.Service;
@@ -54,6 +56,10 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             ContentProperties.Add("\t/**");
             ContentProperties.Add("\t * @property");
             SetContentPropertyType(propertyInfo.PropertyType);
+            if (!propertyInfo.CanWrite)
+            {
+                ContentProperties.Add("\t * @since readonly");
+            }
             ContentProperties.Add("\t */");
             ContentProperties.Add($"\t{modifier} $" + propertyInfo.Name + ";");
         }
@@ -85,7 +91,8 @@ public abstract class PhpTemplates: PhpTemplatesHelper
         SetContentPropertyType(t);
         PropTypes.Clear();
         ContentProperties.Add("\t */");
-        ContentProperties.Add($"\t{modifier} $" + prop.Name.Split(".").Last() + ";");
+        var name = prop.Name.Split(".").Last();
+        ContentProperties.Add($"\t{modifier} ${name};");
     }
     
     protected void MethodsCompile(MethodInfo[] methods, bool isCtor = false)
@@ -109,12 +116,26 @@ public abstract class PhpTemplates: PhpTemplatesHelper
         var countPublic = 0;
         var globalAttribute = "";
 
+        name = name.Split(".").Last();
+        var parentMethods = DetectParentMethods(name);
+        foreach (var pm in parentMethods)
+        {
+            ParentReturns.Add(PhpBaseTypes.Extract(pm.ReturnType.ToString(), true).Split("[").First());
+        }
+        
         foreach (var methodInfo in methods)
         {
-            // if (IsParentMethod(methodInfo))
-            // {
-            //     continue;
-            // }
+            //завершить поиск родительских методов
+            var x = parentMethods.Where( x => 
+                x.Name == methodInfo.Name && 
+                x.IsPublic == methodInfo.IsPublic &&
+                x.IsStatic == methodInfo.IsStatic
+            ).ToArray().Length;
+
+            if(x > 0)
+            {
+                continue;
+            }
             
             n++;
             
@@ -122,7 +143,8 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             var @modifier = GetPhpModifier(methodInfo.IsPublic, methodInfo.IsPrivate);
             var @static = methodInfo.IsStatic ? "static " : "";
             var @args = GetArgsToString();
-            var @type = PhpBaseTypes.Extract(methodInfo.ReturnType.ToString(), true).Split("[").First();
+            var @type = PhpBaseTypes.Extract(methodInfo.ReturnType.ToString(), true)
+                .Split("[").First().Split("+").First();
 
             switch (@modifier)
             {
@@ -143,7 +165,8 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             }
             ContentOverrideMethods.Add("\t * @return " + @type);
             ContentOverrideMethods.Add("\t */");
-            ContentOverrideMethods.Add($"\t#[MethodOverride]{@modifier}{@static}function {name.Split(".").Last()}_{n} ({@args})" + "{}");
+            name = name.ToString().ToUpperFirstSymbol(IsUppercase);
+            ContentOverrideMethods.Add($"\t#[MethodOverride]{@modifier}{@static}function {name}_{n} ({@args})" + "{}");
             
             i += MethodArgs.Count;
             MethodArgs.Clear();
@@ -153,22 +176,12 @@ public abstract class PhpTemplates: PhpTemplatesHelper
         if (ContentUsesMethods.Count > 1)
         {
             ContentMethods.Add("\t/**");
-            ContentMethods.Add(string.Join("\n", ContentUsesMethods)); 
-            ContentMethods.Add("\t * @var mixed|\\override ...$args");
-            if (ReturnOverrideMethods.Count > 0)
-            {
-                ContentMethods.Add("\t * @return " + string.Join("|", ReturnOverrideMethods.Distinct()) + "|mixed|\\override");
-            }
-            else
-            {
-                ContentMethods.Add($"\t * @return mixed|\\override");
-            }
-           
-            ContentMethods.Add("\t */");
             
             if (countPrivate >= n)
             {
                 globalAttribute = "Private";
+                ContentMethods.Add($"\t * @since @override => public | private | protected"); 
+                ContentMethods.Add($"\t * {WarningDisclaimer}"); 
             } 
             else if (countPublic > 0)
             {
@@ -178,14 +191,62 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             {
                 globalAttribute = "Protected";
             }
-
-            name = name.Split(".").Last();
+            
+            ContentMethods.Add(string.Join("\n", ContentUsesMethods)); 
+            ContentMethods.Add("\t * @var mixed|\\override ...$args");
+            if (ReturnOverrideMethods.Count > 0)
+            {
+                if (ParentReturns.Count > ReturnOverrideMethods.Count)
+                {
+                    ContentMethods.Add("\t * @return " + string.Join("|", ParentReturns.Distinct()) + "|mixed|\\override");
+                }
+                else
+                {
+                    ContentMethods.Add("\t * @return " + string.Join("|", ReturnOverrideMethods.Distinct()) + "|mixed|\\override");
+                }
+            }
+            else
+            {
+                ContentMethods.Add($"\t * @return mixed|\\override");
+            }
+           
+            ContentMethods.Add("\t */");
+            
+            name = name.Split(".").Last().ToString().ToUpperFirstSymbol(IsUppercase);
             var args = i > 0 ? "\\override ...$args" : "";
             ContentMethods.Add($"\t#[MethodOverride{globalAttribute}]function {name} ({args})" + "{}");
         }
-        
+        ParentReturns.Clear();
         ReturnOverrideMethods.Clear();
         ContentUsesMethods.Clear();
+    }
+
+    private List<MethodInfo> DetectParentMethods(string name)
+    {
+        return ReverseParentMethods(PhpSdkStorage.Type.Instance, name, new List<MethodInfo>());
+    }
+    
+    private List<MethodInfo> ReverseParentMethods(Type type, string name, List<MethodInfo> parentMethods)
+    {
+        var methods = type.BaseType?.GetMethods(Flags);
+        if(methods != null)
+        {
+            var ms = methods
+                .Where(m => m.Name.Split(".").Last() == name)
+                .ToList();
+            foreach (var m in ms)
+            {
+                parentMethods.Add(m);
+            }
+        }
+        if (type.BaseType != null)
+        {
+            return ReverseParentMethods(type.BaseType, name, parentMethods);
+        }
+        else
+        {
+            return parentMethods;
+        }
     }
 
     protected void CtorCompile(ConstructorInfo[] ctors)
@@ -208,6 +269,7 @@ public abstract class PhpTemplates: PhpTemplatesHelper
                 ContentMethods.Add($"\t * @uses {PhpSdkStorage.Type.Title}Override::__construct_{n} <br>{@modifier}, args: ({@args})<br>");
                 ContentOverrideMethods.Add($"\t */");
                 ContentOverrideMethods.Add($"\t#[MethodOverride]{@modifier}function __construct_{n} ({@args})" + "{}");
+                MethodArgs.Clear();
             }
 
             @args = string.Empty;
@@ -223,10 +285,11 @@ public abstract class PhpTemplates: PhpTemplatesHelper
         {
             ContentMethods.Add("\t/**");
             @modifier = GetPhpModifier(ctors[0].IsPublic, ctors[0].IsPrivate);
-            MethodArgsCompile(ctors[0].GetParameters());
+            MethodArgsCompile(ctors[0].GetParameters(), true);
             var @args = GetArgsToString();
             ContentMethods.Add("\t */");
             ContentMethods.Add($"\t{@modifier}function __construct({@args})" + "{}");
+            MethodArgs.Clear();
         }
     }
     

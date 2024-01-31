@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using PhpieSdk.Library.Service;
 
 namespace PhpieSdk.Library;
@@ -16,6 +17,8 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
     public ISettings Execute()
     {
         ReadAndDeleteFilesLoaded();
+        
+        ColdLoader();
         
         AssemblyLoader();
         AssemblyIterator();
@@ -87,6 +90,16 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
         return Settings.RootPath + $"{name}";
     }
 
+    private void ColdLoader()
+    {
+        List<object> listObjects = LoaderList.Concat(Settings.PreloadList).Distinct().ToList();
+        foreach (var o in listObjects)
+        {
+            var s = o.ToString();
+        }
+        Settings.PreloadList.Clear();
+    }
+    
     public override PhpSdkSettings Settings { get; init; }
 }
 
