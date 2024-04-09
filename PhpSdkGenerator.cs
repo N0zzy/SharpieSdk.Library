@@ -63,7 +63,10 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
 
         foreach (var line in File.ReadAllLines(path))
         {
-            var items = line.Split(" ");
+            string[] items = line.Split(" ");
+            
+            if(items.Length != 2) continue;
+            
             if (!PhpSdkStorage.Files.ContainsKey(items[0]))
             {
                 PhpSdkStorage.Files.Add(items[0], new List<string>());
@@ -80,6 +83,7 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
         using StreamWriter stream = new StreamWriter(path);
         foreach (var file in PhpSdkStorage.Files)
         {
+            if(file.Value.Count != 2) continue;
             stream.WriteLine(file.Key + " " + file.Value[1]);
         }
         stream.Close();

@@ -36,7 +36,7 @@ public abstract class PhpSdkProvider: PhpSdkProvider.ISettings
     
     protected void AssemblyIterator()
     {
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             if (IsIgnoreAssemblyIterator(assembly))
             {
@@ -44,6 +44,7 @@ public abstract class PhpSdkProvider: PhpSdkProvider.ISettings
             }
             
             AssemblyTypesIterator(assembly);
+            
             if (Settings.IsViewMessageAboutLoaded)
             {
                 PhpSdkStorage.Assembly.Name.WriteLn("assembly loaded:");
@@ -60,13 +61,13 @@ public abstract class PhpSdkProvider: PhpSdkProvider.ISettings
         }
     }
     
-    private bool IsIgnoreAssemblyIterator(in Assembly assembly)
+    private bool IsIgnoreAssemblyIterator(Assembly assembly)
     {
-        var isContinue = false;
+        bool isContinue = false;
         PhpSdkStorage.Assembly.Name = assembly.GetName().Name;
-        foreach (var fileStream in assembly.GetFiles())
+        foreach (FileStream fileStream in assembly.GetFiles())
         {
-            var key = fileStream.Name.ToReversSlash().GetMD5();
+            string key = fileStream.Name.ToReversSlash().GetMD5();
             if (PhpSdkStorage.Files.ContainsKey(key))
             {
                 if (PhpSdkStorage.Files[key][0] == PhpSdkStorage.Files[key][1])

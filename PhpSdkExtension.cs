@@ -117,7 +117,7 @@ public static class PhpSdkExtension
         MD5 md5 = MD5.Create();
         return BitConvert(md5.ComputeHash(hashBytes));
     }
-
+    
     private static string BitConvert(byte[] hashBytes)
     {
         return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();

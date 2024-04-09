@@ -33,7 +33,7 @@ public class PhpSdkSettings
     /// <summary>
     ///
     /// </summary>
-    public bool IsViewMessageAboutLoaded { get; init; } = true;
+    public bool IsViewMessageAboutLoaded { get; set; } = false;
     public HashSet<string> LibrariesListLoaded { get; set; }
     public List<string> IgnoreList{ get; init; }
     public List<object> PreloadList { get; init; } = new ();

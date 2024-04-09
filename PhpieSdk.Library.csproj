@@ -17,16 +17,43 @@
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="Peachpie.Library" Version="1.2.0-r16166" />
+      <PackageReference Include="Peachpie.Library" Version="1.2.0-r17054" />
     </ItemGroup>
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
-        <None Remove="__Service\**" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Remove="__Service\**" />
+      <Content Include=".git\config" />
+      <Content Include=".git\description" />
+      <Content Include=".git\HEAD" />
+      <Content Include=".git\hooks\applypatch-msg.sample" />
+      <Content Include=".git\hooks\commit-msg.sample" />
+      <Content Include=".git\hooks\fsmonitor-watchman.sample" />
+      <Content Include=".git\hooks\post-update.sample" />
+      <Content Include=".git\hooks\pre-applypatch.sample" />
+      <Content Include=".git\hooks\pre-commit.sample" />
+      <Content Include=".git\hooks\pre-merge-commit.sample" />
+      <Content Include=".git\hooks\pre-push.sample" />
+      <Content Include=".git\hooks\pre-rebase.sample" />
+      <Content Include=".git\hooks\pre-receive.sample" />
+      <Content Include=".git\hooks\prepare-commit-msg.sample" />
+      <Content Include=".git\hooks\push-to-checkout.sample" />
+      <Content Include=".git\hooks\sendemail-validate.sample" />
+      <Content Include=".git\hooks\update.sample" />
+      <Content Include=".git\index" />
+      <Content Include=".git\info\exclude" />
+      <Content Include=".git\logs\HEAD" />
+      <Content Include=".git\logs\refs\heads\release-1" />
+      <Content Include=".git\logs\refs\remotes\origin\HEAD" />
+      <Content Include=".git\objects\pack\pack-bbd5a5df92140044c94fa9be0b7bad09c9ca4105.idx" />
+      <Content Include=".git\objects\pack\pack-bbd5a5df92140044c94fa9be0b7bad09c9ca4105.pack" />
+      <Content Include=".git\objects\pack\pack-bbd5a5df92140044c94fa9be0b7bad09c9ca4105.rev" />
+      <Content Include=".git\packed-refs" />
+      <Content Include=".git\refs\heads\release-1" />
+      <Content Include=".git\refs\remotes\origin\HEAD" />
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Remove="__Service\**" />
+      <Folder Include=".git\objects\info\" />
+      <Folder Include=".git\refs\tags\" />
     </ItemGroup>
 </Project>
