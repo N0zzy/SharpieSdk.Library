@@ -86,13 +86,28 @@ public abstract class PhpTemplates: PhpTemplatesHelper
         }
         
         ContentProperties.Add("\t/**");
-        ContentProperties.Add("\t * @property dublicate");
+        ContentProperties.Add("\t * @property duplicate");
         var t = string.Join('|', PropTypes.Distinct());
         SetContentPropertyType(t);
         PropTypes.Clear();
         ContentProperties.Add("\t */");
         var name = prop.Name.Split(".").Last();
         ContentProperties.Add($"\t{modifier} ${name};");
+    }
+
+    protected void EventsCompile(EventInfo[] eventInfos)
+    {
+        foreach (var ev in  eventInfos)
+        {
+            ContentEvents.Add("\t/**");
+            ContentEvents.Add("\t * @event");
+            SetContentEventType(ev.EventHandlerType);
+            SetContentEventUsesMethods(ev.EventHandlerType);
+            ContentEvents.Add("\t */");
+            var modifier = GetPhpModifier( ev.GetAddMethod()!.IsPublic,  ev.GetAddMethod()!.IsPrivate);
+            var @static = ev.GetAddMethod()!.IsStatic ? "static " : "";
+            ContentEvents.Add($"\t{modifier}{@static}${ev.Name};");
+        }
     }
     
     protected void MethodsCompile(MethodInfo[] methods, bool isCtor = false)
@@ -103,7 +118,6 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             {
                 continue;
             }
-            
             SetContentMethod(methodInfo, isCtor);
         }
     }
@@ -332,6 +346,9 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             Script.Add(string.Join("\n", ContentUses));
             ContentUses.Clear();
         }
+        
+        Script.Add(string.Join("\n", ContentEvents));
+        ContentEvents.Clear();
         
         Script.Add(string.Join("\n", ContentProperties));
         ContentProperties.Clear();

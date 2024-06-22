@@ -31,10 +31,15 @@ public class PhpSdkSettings
     /// </summary>
     public bool IsUppercaseNames { get; init; } = false;
     /// <summary>
-    ///
+    /// Флаг отображения сообщений при выполнении
     /// </summary>
-    public bool IsViewMessageAboutLoaded { get; set; } = false;
+    public bool IsViewMessageAboutLoaded { get; init; } = false;
+    /// <summary>
+    /// Флаг вкл/откл кеш-регистра .sdkfiles
+    /// </summary>
+    public bool IsCached { get; init; } = true;
     public HashSet<string> LibrariesListLoaded { get; set; }
-    public List<string> IgnoreList{ get; init; }
+    public List<string> IgnoreList { get; init; } = new ();
     public List<object> PreloadList { get; init; } = new ();
+    public string EventType { get; init; } = null;
 }

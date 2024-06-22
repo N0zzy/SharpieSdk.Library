@@ -21,4 +21,9 @@ public class PhpInterface: PhpFactory
     {
         MethodsCompile(PhpSdkStorage.Type.Instance.GetMethods(Flags));
     }
+
+    protected override void Events()
+    {
+
+    }
 }

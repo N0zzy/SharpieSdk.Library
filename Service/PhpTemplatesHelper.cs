@@ -13,6 +13,7 @@ public abstract class PhpTemplatesHelper
     
     protected List<string> Script = new();
     protected List<string> ContentProperties = new();
+    protected List<string> ContentEvents = new();
     protected List<string> ContentMethods = new();
     protected List<string> ContentOverrideMethods = new();
     protected List<string> ContentUsesMethods = new();
@@ -110,6 +111,18 @@ public abstract class PhpTemplatesHelper
         ContentProperties.Add("\t" + $"{@var}");
     }
 
+    protected void SetContentEventType(in Type t)
+    {
+        var customType = PhpSdkStorage.Type.EventType != null ? $"|{PhpSdkStorage.Type.EventType}" : "";
+        ContentEvents.Add("\t * @var " + PhpBaseTypes.Extract(t.ToString(), true) + customType);
+    }
+    
+    protected void SetContentEventUsesMethods(in Type t)
+    {
+        ContentEvents.Add($"\t * @uses {PhpSdkStorage.Type.Name}::add_{t.Name}()");
+        ContentEvents.Add($"\t * @uses {PhpSdkStorage.Type.Name}::remove_{t.Name}()");
+    }
+    
     protected string GetPhpModifier(bool isPublic, bool isPrivate)
     {
         return isPublic ? "public " : (isPrivate ? "private " : "protected ");

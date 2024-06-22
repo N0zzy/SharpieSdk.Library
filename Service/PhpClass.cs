@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace PhpieSdk.Library.Service;
 
@@ -71,6 +72,16 @@ public class PhpClass: PhpFactory
         }
 
         CtorCompile(PhpSdkStorage.Type.Instance.GetConstructors());
+    }
+
+    protected override void Events()
+    {
+        var groupedEvents = PhpSdkStorage.Type.Instance.GetEvents().ToList();
+        if ( PhpSdkStorage.Type.Name != "Program")
+        {
+            return;
+        }
+        EventsCompile(groupedEvents.ToArray());
     }
     
     private string GetExtends()

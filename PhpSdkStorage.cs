@@ -18,6 +18,8 @@ public class PhpSdkStorage
     {
         public static System.Type Instance { get; set; } = null;
         
+        public static string EventType { get; set; } = null;
+        
         public class Model
         {
             public static string Path { get; set; } = null;

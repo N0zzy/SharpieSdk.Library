@@ -13,6 +13,7 @@ public abstract class PhpFactory: PhpTemplates
     protected abstract void Models();
     protected abstract void Properties();
     protected abstract void Methods();
+    protected abstract void Events();
 
     public PhpFactory SetUppercase(bool value)
     {
@@ -43,10 +44,12 @@ public abstract class PhpFactory: PhpTemplates
         Task<bool> taskProperties = Task.Run(() => { Properties(); return true; });
         Task<bool> taskComments = Task.Run(() => { Comments(); return true; });
         Task<bool> taskModels = Task.Run(() => { Models(); return true; });
+        Task<bool> taskEvents = Task.Run(() => { Events(); return true; });
         bool result = taskComments.Result && 
                       taskModels.Result && 
                       taskProperties.Result && 
-                      taskMethods.Result;
+                      taskMethods.Result && 
+                      taskEvents.Result;
         if (result)
         {
             PhpSdkStorage.Type.Model.Clear();

@@ -14,7 +14,7 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
         Initialize();
     }
 
-    public ISettings Execute()
+    public void Execute()
     {
         ReadAndDeleteFilesLoaded();
         
@@ -24,12 +24,11 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
         AssemblyIterator();
         
         SaveFilesLoaded();
-        
-        return this;
     }
     
     private void Initialize()
     {
+        PhpSdkStorage.Type.EventType = Settings.EventType;
         SetPaths();
     }
     
@@ -80,6 +79,16 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
     private void SaveFilesLoaded()
     {
         var path = GetPathLoaded(Settings.SdkFilesName);
+        
+        if (!Settings.IsCached)
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            return;
+        }
+        
         using StreamWriter stream = new StreamWriter(path);
         foreach (var file in PhpSdkStorage.Files)
         {

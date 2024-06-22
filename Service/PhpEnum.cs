@@ -23,4 +23,9 @@ public class PhpEnum: PhpFactory
     {
         
     }
+
+    protected override void Events()
+    {
+        
+    }
 }
