@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Pchp.Library.Streams;
 
 namespace PhpieSdk.Library.Service;
 
@@ -30,12 +31,19 @@ public struct PhpBaseTypes
         ["system.double[][]"] = "array",
         ["system.float[][]"] = "array",
         ["system.boolean[][]"] = "array",
+        ["system.byte[]"] = "array",
+        ["system.byte[][]"] = "array",
+        ["system.eventhandler"] = PhpSdkStorage.Type.EventType
     };
 
     private static string Convert(string type)
     {
         string _type = type.ToLower();
-        return Types.ContainsKey(_type) ? $"{type}|{Types[_type]}" : type;
+        if (Types.ContainsKey(_type) && !string.IsNullOrEmpty( Types[_type] ))
+        {
+            return $"{type}|{Types[_type]}";
+        }
+        return type;
     }
 
     public static string Extract(string argType, bool isSeparator = false)

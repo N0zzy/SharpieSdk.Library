@@ -114,13 +114,13 @@ public abstract class PhpTemplatesHelper
     protected void SetContentEventType(in Type t)
     {
         var customType = PhpSdkStorage.Type.EventType != null ? $"|{PhpSdkStorage.Type.EventType}" : "";
-        ContentEvents.Add("\t * @var " + PhpBaseTypes.Extract(t.ToString(), true) + customType);
+        ContentEvents.Add("\t * @var " + PhpBaseTypes.Extract(t.ToString(), true));
     }
     
-    protected void SetContentEventUsesMethods(in Type t)
+    protected void SetContentEventUsesMethods(string name)
     {
-        ContentEvents.Add($"\t * @uses {PhpSdkStorage.Type.Name}::add_{t.Name}()");
-        ContentEvents.Add($"\t * @uses {PhpSdkStorage.Type.Name}::remove_{t.Name}()");
+        ContentEvents.Add($"\t * @uses {PhpSdkStorage.Type.Name}::add_{name}()");
+        ContentEvents.Add($"\t * @uses {PhpSdkStorage.Type.Name}::remove_{name}()");
     }
     
     protected string GetPhpModifier(bool isPublic, bool isPrivate)

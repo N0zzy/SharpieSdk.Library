@@ -102,7 +102,7 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             ContentEvents.Add("\t/**");
             ContentEvents.Add("\t * @event");
             SetContentEventType(ev.EventHandlerType);
-            SetContentEventUsesMethods(ev.EventHandlerType);
+            SetContentEventUsesMethods(ev.Name);
             ContentEvents.Add("\t */");
             var modifier = GetPhpModifier( ev.GetAddMethod()!.IsPublic,  ev.GetAddMethod()!.IsPrivate);
             var @static = ev.GetAddMethod()!.IsStatic ? "static " : "";
@@ -340,21 +340,30 @@ public abstract class PhpTemplates: PhpTemplatesHelper
         Script.Add(Header.Replace('`', '_'));
         
         Script.Add(SymbolOBrace);
-        
+
         if (ContentUses.Count > 0)
         {
             Script.Add(string.Join("\n", ContentUses));
             ContentUses.Clear();
         }
+
+        if (ContentEvents.Count > 0)
+        {
+            Script.Add(string.Join("\n", ContentEvents));
+            ContentEvents.Clear();
+        }
         
-        Script.Add(string.Join("\n", ContentEvents));
-        ContentEvents.Clear();
+        if (ContentProperties.Count > 0)
+        {
+            Script.Add(string.Join("\n", ContentProperties));
+            ContentProperties.Clear();
+        }
         
-        Script.Add(string.Join("\n", ContentProperties));
-        ContentProperties.Clear();
-        
-        Script.Add(string.Join("\n", ContentMethods));
-        ContentMethods.Clear();
+        if (ContentMethods.Count > 0)
+        {
+            Script.Add(string.Join("\n", ContentMethods));
+            ContentMethods.Clear();
+        }
         
         Script.Add(SymbolСBrace);
     }
