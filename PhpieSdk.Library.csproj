@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Configurations>Debug</Configurations>
-        <Version>1.1.1</Version>
+        <Version>1.1.2</Version>
         <Title>PhpieSdk.Library</Title>
         <Description>PhpieSdk.Library</Description>
         <PackageProjectUrl>https://github.com/N0zzy/PhpieSdk.Library</PackageProjectUrl>
@@ -16,8 +16,10 @@
       <DebugType>none</DebugType>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="Peachpie.Library" Version="1.2.0-r17054" />
+<!--        <PackageReference Include="NuGet.Packaging" Version="6.10.0" />-->
+<!--        <PackageReference Include="NuGet.Protocol" Version="6.10.0" />-->
+<!--        <PackageReference Include="NuGet.ProjectModel" Version="6.10.0" />-->
+        <PackageReference Include="Peachpie.Library" Version="1.2.0-r17054" />
     </ItemGroup>
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />

@@ -72,13 +72,8 @@ public class AssemblyLoader
             var frs = f.ToReversSlash();
             if (File.Exists(frs))
             {
-                Assembly.LoadFrom(frs);
+                Assembly assembly = Assembly.LoadFrom(frs);
                 LibrariesListLoaded.Add(frs);
-                
-                if (IsViewMessageAboutLoaded)
-                {
-                    frs.WriteLn("library loaded:");
-                }
             }
         }
         

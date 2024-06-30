@@ -1,15 +1,15 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace PhpieSdk.Library.Service;
 
 public class PhpClass: PhpFactory
 {
     private bool isStruct = false;
+    private string Xml = null;
     
     protected override void Comments()
     {
-
+        //Xml = GetXml( PhpSdkStorage.Type.Instance.Assembly );
     }
 
     protected override void Models()
@@ -17,7 +17,10 @@ public class PhpClass: PhpFactory
         string impls = GetImpsInterfaces();
         var modifier = GetModifierAbstract();
         modifier = string.IsNullOrEmpty(modifier) ? GetModifierFinal() : "";
-        Header = modifier + PhpSdkStorage.Type.Model.Name + " " + PhpSdkStorage.Type.Name;
+        Header = "/**\n";
+        Header += " * " + Xml + "\n";
+        Header += " */\n";
+        Header += modifier + PhpSdkStorage.Type.Model.Name + " " + PhpSdkStorage.Type.Name;
         Header += $"{GetExtends()}{impls}";
     }
 

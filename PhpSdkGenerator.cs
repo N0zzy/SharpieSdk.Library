@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using PhpieSdk.Library.Service;
 
 namespace PhpieSdk.Library;
@@ -28,8 +29,11 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
     
     private void Initialize()
     {
-        PhpSdkStorage.Type.EventType = Settings.EventType;
         SetPaths();
+        
+        PhpSdkStorage.Assembly.Current = Assembly.GetExecutingAssembly().GetName().Name;
+        PhpSdkStorage.Assembly.Path = Settings.RootPath;
+        PhpSdkStorage.Type.EventType = Settings.EventType;
     }
     
     private void SetPaths()
@@ -42,7 +46,7 @@ public sealed class PhpSdkGenerator: PhpSdkProvider, PhpSdkProvider.ISettings
     private void SetSettingCurrentPath(string path)
     {
         if(string.IsNullOrEmpty(Settings.CurrentPath)) 
-            Settings.CurrentPath = path;
+            Settings.CurrentPath = PhpSdkStorage.Assembly.Path = path;
     }
     
     private void SetSettingRootPath(string path)

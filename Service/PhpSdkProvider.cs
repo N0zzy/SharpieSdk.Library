@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
+using System.Xml.Linq;
 
 namespace PhpieSdk.Library.Service;
 
@@ -93,6 +96,8 @@ public abstract class PhpSdkProvider: PhpSdkProvider.ISettings
         PhpSdkStorage.Type.Model.Extends = PhpModel.GetExtends(type);
         PhpSdkStorage.Type.Model.Implements = PhpModel.GetImplements(type);
         
+        PhpXmlCommentsWrapper(type);
+        
         MakeDirectory();
 
         PhpSdkStorage.Type.Model.Path = sdkPath;
@@ -134,5 +139,77 @@ public abstract class PhpSdkProvider: PhpSdkProvider.ISettings
         PhpModel.Wrapper.ModelName = PhpSdkStorage.Type.Model.Name;
         PhpModel.Wrapper.IsUppercase = Settings.IsUppercaseNames;
         PhpModel.Wrapper.Run();
+    }
+    
+    private void PhpXmlCommentsWrapper(Type type)
+    {
+        PhpSdkStorage.Assembly.FrameworkVersion = GetVersionFramework( type.Assembly );
+        PhpSdkStorage.Assembly.Version = GetAssemblyInformationalVersionAttribute( type.Assembly );
+        
+        var xmpPath = GetXmlPath();
+        if (xmpPath != PhpSdkStorage.Assembly.XmlPath)
+        {
+            PhpSdkStorage.Assembly.XmlPath = xmpPath;
+            PhpSdkStorage.Assembly.Xml = GetXml();
+        }
+    }
+    
+    private string GetVersionFramework(Assembly assembly)
+    {
+        Dictionary<string, string> frameworks = new Dictionary<string, string>()
+        {
+            {".NETCoreApp,Version=v5.0", "net5.0"},
+            {".NETCoreApp,Version=v6.0", "net6.0"},
+            {".NETCoreApp,Version=v7.0", "net7.0"},
+            {".NETCoreApp,Version=v8.0", "net8.0"},
+            {".NETStandard,Version=v1.0", "netstandard1.0"},
+            {".NETStandard,Version=v1.3", "netstandard1.3"},
+            {".NETStandard,Version=v2.0", "netstandard2.0"},
+            {".NETStandard,Version=v2.1", "netstandard2.1"},
+            {".NETStandard,Version=v3.1", "netstandard3.1"}
+        };
+        var name = string.Empty;
+        var targetFrameworkAttribute = assembly.GetCustomAttribute<TargetFrameworkAttribute>();
+        if( targetFrameworkAttribute == null ) return string.Empty;
+        if (frameworks.TryGetValue(targetFrameworkAttribute!.FrameworkName, out string value))
+        {
+            name = value;
+        }
+        return name;
+    }
+
+    private string GetAssemblyInformationalVersionAttribute(Assembly assembly)
+    {
+        var version = string.Empty;
+        var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        if (attribute != null)
+        {
+            version = attribute.InformationalVersion.Split("+")[0].Trim();
+        }
+        return version;
+    }
+    
+    private string GetXmlPath()
+    {
+        var s = PhpSdkStorage.Type.Instance.Assembly.GetName().Name;
+        if (s != null)
+        {
+            var name = s.ToLower();
+            return Environment.ExpandEnvironmentVariables(
+                "%userprofile%\\.nuget\\packages\\" +
+                name.ToLower() + "\\" +
+                PhpSdkStorage.Assembly.Version + "\\lib\\" +
+                PhpSdkStorage.Assembly.FrameworkVersion + "\\" +
+                name + ".xml"
+            ).ToReversSlash();
+        }
+        return null;
+    }
+    
+    private XDocument GetXml()
+    {
+        return File.Exists(PhpSdkStorage.Assembly.XmlPath)
+            ? XDocument.Load(PhpSdkStorage.Assembly.XmlPath)
+            : null;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace PhpieSdk.Library;
 
@@ -7,6 +8,13 @@ public class PhpSdkStorage
     public class Assembly
     {
         public static string Name { get; set; } = null;
+        public static string Current { get; set; } = null;
+        public static string Path { get; set; } = null;
+        public static string Version { get; set; } = null;
+        public static string FrameworkVersion{ get; set; } = null;
+        public static string FrameworkPackagePath { get; set; } = null;
+        public static XDocument Xml { get; set; } = null;
+        public static string XmlPath { get; set; } = null;
         
         public static void Clear()
         {
@@ -42,7 +50,9 @@ public class PhpSdkStorage
         public static string Title { get; set; } = null;
         public static string FullName { get; set; } = null;
         public static string Namespace { get; set; } = null;
-        
+
+
+
         public static void Clear()
         {
             Name = null;

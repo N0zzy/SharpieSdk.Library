@@ -128,7 +128,10 @@ public abstract class PhpTemplates: PhpTemplatesHelper
         var n = 0;
         var countPrivate = 0;
         var countPublic = 0;
+        var countStatic = 0;
         var globalAttribute = "";
+        var globalStatic = "";
+
 
         name = name.Split(".").Last();
         var parentMethods = DetectParentMethods(name);
@@ -167,6 +170,11 @@ public abstract class PhpTemplates: PhpTemplatesHelper
                 case "private ": countPrivate++;
                     break;
             }
+
+            if (@static.Length > 0)
+            {
+                countStatic++;
+            }
             
             ReturnOverrideMethods.Add(@type);
             ContentUsesMethods.Add($"\t * @uses {PhpSdkStorage.Type.Title}Override::{name}_{n} <br>{@modifier}, args: ({@args})<br>");
@@ -179,8 +187,8 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             }
             ContentOverrideMethods.Add("\t * @return " + @type);
             ContentOverrideMethods.Add("\t */");
-            name = name.ToString().ToUpperFirstSymbol(IsUppercase);
-            ContentOverrideMethods.Add($"\t#[MethodOverride]{@modifier}{@static}function {name}_{n} ({@args})" + "{}");
+            name = name.ToUpperFirstSymbol(IsUppercase);
+            ContentOverrideMethods.Add($"\t#[MethodOverride]\n\t{@modifier}{@static}function {name}_{n} ({@args})" + "{}");
             
             i += MethodArgs.Count;
             MethodArgs.Clear();
@@ -205,6 +213,11 @@ public abstract class PhpTemplates: PhpTemplatesHelper
             {
                 globalAttribute = "Protected";
             }
+
+            if (countStatic == ContentUsesMethods.Count)
+            {
+                globalStatic = "static ";
+            }
             
             ContentMethods.Add(string.Join("\n", ContentUsesMethods)); 
             ContentMethods.Add("\t * @var mixed|\\override ...$args");
@@ -226,9 +239,9 @@ public abstract class PhpTemplates: PhpTemplatesHelper
            
             ContentMethods.Add("\t */");
             
-            name = name.Split(".").Last().ToString().ToUpperFirstSymbol(IsUppercase);
+            name = name.Split(".").Last().ToUpperFirstSymbol(IsUppercase);
             var args = i > 0 ? "\\override ...$args" : "";
-            ContentMethods.Add($"\t#[MethodOverride{globalAttribute}]function {name} ({args})" + "{}");
+            ContentMethods.Add($"\t#[MethodOverride{globalAttribute}]\n\t{globalStatic}function {name} ({args})" + "{}");
         }
         ParentReturns.Clear();
         ReturnOverrideMethods.Clear();
